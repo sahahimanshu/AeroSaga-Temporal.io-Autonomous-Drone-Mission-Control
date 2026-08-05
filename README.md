@@ -1,1 +1,1 @@
-# -AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control
+# AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control
