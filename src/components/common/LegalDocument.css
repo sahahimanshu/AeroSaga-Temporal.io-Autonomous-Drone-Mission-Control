@@ -1,0 +1,24 @@
+.legal-document__meta {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.legal-document__section + .legal-document__section {
+  margin-top: var(--space-5);
+}
+
+.legal-document__heading {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.legal-document__paragraph {
+  margin-bottom: var(--space-2);
+}
+
+.legal-document__paragraph:last-child {
+  margin-bottom: 0;
+}
