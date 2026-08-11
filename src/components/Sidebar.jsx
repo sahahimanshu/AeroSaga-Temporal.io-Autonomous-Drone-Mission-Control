@@ -13,7 +13,6 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">AeroSaga</div>
-
       <nav className="sidebar-nav">
         {navItems.map((item) => (
           <NavLink
