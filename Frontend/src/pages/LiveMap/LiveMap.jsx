@@ -15,7 +15,7 @@ className="back-button"
 
     <div className="live-map-page">
 
-      {/* Header */}
+      
       <div className="live-map-header">
         <div>
           <h1>Live Map</h1>
@@ -28,12 +28,12 @@ className="back-button"
         </div>
       </div>
 
-      {/* Map */}
+      
       <div className="live-map-container">
         <CesiumMap />
       </div>
 
-      {/* Active Drones */}
+    
       <div className="active-drones">
         <div className="section-header">
           <h2>Active Drones</h2>
@@ -44,7 +44,7 @@ className="back-button"
 
           <div className="drone-card">
             <div className="drone-card-header">
-              <h3>✈️ M-101 </h3>
+              <h3>✈ M-101 </h3>
               <span className="offline">Offline</span>
             </div>
 
@@ -70,7 +70,7 @@ className="back-button"
 
           <div className="drone-card">
             <div className="drone-card-header">
-              <h3>✈️ M-102</h3>
+              <h3>✈ M-102</h3>
               <span className="online">Online</span>
             </div>
 
@@ -96,7 +96,7 @@ className="back-button"
 
           <div className="drone-card">
             <div className="drone-card-header">
-              <h3>✈️ M-103</h3>
+              <h3>✈ M-103</h3>
               <span className="online">Online</span>
             </div>
 
