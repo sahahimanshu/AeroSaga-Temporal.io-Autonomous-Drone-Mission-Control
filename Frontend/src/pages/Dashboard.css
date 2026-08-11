@@ -211,15 +211,39 @@
   font-size: 12px !important;
 }
 
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #00e6a8 !important;
+  font-size: 12px !important;
+}
+
 .live-indicator span {
   width: 8px;
   height: 8px;
-
   margin: 0;
-
   border-radius: 50%;
-
   background: #00e6a8;
+
+  animation: liveBlink 1s infinite ease-in-out;
+}
+
+@keyframes liveBlink {
+  0% {
+    opacity: 1;
+    box-shadow: 0 0 4px #00e6a8;
+  }
+
+  50% {
+    opacity: 0.2;
+    box-shadow: 0 0 2px #00e6a8;
+  }
+
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 12px #00e6a8;
+  }
 }
 .map-wrapper {
   width: 100%;

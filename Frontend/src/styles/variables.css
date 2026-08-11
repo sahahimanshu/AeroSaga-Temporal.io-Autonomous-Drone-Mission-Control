@@ -1,0 +1,63 @@
+:root {
+  /* Colors — AeroSaga dark mission-control theme */
+  --color-bg: #090c14;
+  --color-surface: #0e1420;
+  --color-surface-raised: #131a29;
+  --color-border: #232b3d;
+  --color-border-focus: #3b82f6;
+
+  --color-text-primary: #f3f5f9;
+  --color-text-secondary: #9aa4b8;
+  --color-text-muted: #5b6478;
+
+  --color-accent: #2f6fed;
+  --color-accent-hover: #4a84f2;
+  --color-accent-active: #2559c4;
+  --color-accent-soft: rgba(47, 111, 237, 0.12);
+
+  --color-danger: #f0576b;
+  --color-danger-soft: rgba(240, 87, 107, 0.1);
+  --color-success: #34c78e;
+
+  /* Typography */
+  --font-display: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-body: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-base: 0.9375rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.75rem;
+  --fs-2xl: 2rem;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-full: 999px;
+
+  /* Shadow */
+  --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.45);
+  --shadow-focus: 0 0 0 3px rgba(47, 111, 237, 0.25);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 220ms ease;
+}

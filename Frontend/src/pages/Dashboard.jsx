@@ -56,7 +56,7 @@ function Dashboard() {
 
           <div className="stat-content">
             <p>Total Drones</p>
-            <h2>24</h2>
+            <h2>50</h2>
             <span>All registered drones</span>
           </div>
         </div>
@@ -69,8 +69,8 @@ function Dashboard() {
 
           <div className="stat-content">
             <p>Active Drones</p>
-            <h2>18</h2>
-            <span>75% of total fleet</span>
+            <h2>1</h2>
+            
           </div>
         </div>
 
@@ -82,8 +82,8 @@ function Dashboard() {
 
           <div className="stat-content">
             <p>Offline Drones</p>
-            <h2>2</h2>
-            <span>8.3% of total fleet</span>
+            <h2>0</h2>
+            
           </div>
         </div>
 
@@ -130,8 +130,8 @@ function Dashboard() {
             </div>
 
             <div className="live-indicator">
-              <span></span>
-              LIVE
+               <span></span>
+                LIVE
             </div>
           </div>
 

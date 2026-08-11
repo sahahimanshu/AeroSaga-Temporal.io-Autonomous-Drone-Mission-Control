@@ -17,11 +17,11 @@ function Navbar() {
         </div>
 
         <div className="admin-user">
-          <div className="admin-icon">♟</div>
+          <div className="admin-icon">👤</div>
 
           <div>
-            <strong>Admin User</strong>
-            <span>Super Administrator</span>
+            <strong>{localStorage.getItem("loginEmail") || "Login Email"}</strong>
+
           </div>
         </div>
       </div>

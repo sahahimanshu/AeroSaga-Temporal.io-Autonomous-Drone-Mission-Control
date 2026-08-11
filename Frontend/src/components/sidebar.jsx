@@ -1,15 +1,13 @@
+import { useNavigate } from "react-router-dom";
+
 function Sidebar() {
+  const navigate = useNavigate();
+
   const menuItems = [
     { icon: "🏠", name: "Dashboard" },
-    { icon: "📡", name: " My Drones" },
-    { icon: "📋", name: "Missions" },
-    { icon: "📍", name: "Waypoints" },
+    { icon: "📋", name: "My Missions" },
     { icon: "🗺️", name: "Live Map" },
-    { icon: "🔔", name: "Alerts", badge: 5 },
-    { icon: "📄", name: "Reports" },
-    { icon: "🔧", name: "Maintenance" },
-    { icon: "♟", name: "Users" },
-    { icon: "⚙️", name: "Settings" },
+    { icon: "🔔", name: "Alerts", badge: 0 },
   ];
 
   return (
@@ -20,11 +18,22 @@ function Sidebar() {
         {menuItems.map((item, index) => (
           <div
             key={item.name}
-            className={`sidebar-item ${index === 0 ? "active" : ""}`}
+            className={`sidebar-item ${
+              index === 0 ? "active" : ""
+            }`}
+            onClick={() => {
+              if (item.name === "Dashboard") {
+                navigate("/dashboard");
+              } else if (item.name === "Live Map") {
+                navigate("/live-map");
+              }
+            }}
           >
             <span className="sidebar-icon">{item.icon}</span>
 
-            <span className="sidebar-name">{item.name}</span>
+            <span className="sidebar-name">
+              {item.name}
+            </span>
 
             {item.badge && (
               <span className="alert-badge">
