@@ -84,7 +84,30 @@ body {
   align-items: flex-start;
   flex-wrap: wrap;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
+}
+
+.status-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.status-filter {
+  background: #10151f;
+  color: #dfe7f5;
+  border: 1px solid #1a2332;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-filter.active {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
 }
 
 .search-bar {

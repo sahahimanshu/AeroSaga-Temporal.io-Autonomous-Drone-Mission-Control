@@ -106,24 +106,37 @@ export default function Dashboard() {
   );
 } */
 
-  import { useState } from "react";
+import { useMemo, useState } from "react";
 import SearchBar from "../components/SearchBar";
 import BackToAdminButton from "../components/BackToAdminButton";
 import LiveMap from "../components/LiveMap";
 import SelectedDronePanel from "../components/SelectedDronePanel";
 import { mockDrones } from "../data/mockDrones";
 
+const statusOptions = ["All", "Active", "In Progress", "Returning", "Standby"];
+
 export default function Dashboard() {
   const [query, setQuery] = useState("");
+  const [activeStatus, setActiveStatus] = useState("All");
 
-  const matchedDrone = mockDrones.find(
-    (drone) =>
-      drone.id.toLowerCase().includes(query.toLowerCase()) ||
-      drone.name.toLowerCase().includes(query.toLowerCase())
-  );
+  const filteredDrones = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
 
-  // If nothing typed yet, default to showing the first drone
-const droneToShow = query ? matchedDrone : null;
+    return mockDrones.filter((drone) => {
+      const matchesQuery =
+        !normalizedQuery ||
+        drone.id.toLowerCase().includes(normalizedQuery) ||
+        drone.name.toLowerCase().includes(normalizedQuery);
+
+      const matchesStatus =
+        activeStatus === "All" || drone.status === activeStatus;
+
+      return matchesQuery && matchesStatus;
+    });
+  }, [activeStatus, query]);
+
+  const droneToShow = filteredDrones[0] || null;
+
   return (
     <div className="page-container">
       <BackToAdminButton />
@@ -136,11 +149,28 @@ const droneToShow = query ? matchedDrone : null;
         />
       </div>
 
+      <div className="status-filter-row" aria-label="Drone status filters">
+        {statusOptions.map((status) => (
+          <button
+            key={status}
+            type="button"
+            className={status === activeStatus ? "status-filter active" : "status-filter"}
+            onClick={() => setActiveStatus(status)}
+          >
+            {status}
+          </button>
+        ))}
+      </div>
+
       <div className="dashboard-grid">
         <div className="dashboard-left">
           <div className="panel map-placeholder">
             <h3>Live Map</h3>
-            <p className="panel-subtext">Real-time drone positions</p>
+            <p className="panel-subtext">
+              {filteredDrones.length
+                ? `Showing ${filteredDrones.length} drone${filteredDrones.length > 1 ? "s" : ""}`
+                : "No drones match the current filters"}
+            </p>
             <LiveMap selectedDroneId={droneToShow?.id} />
           </div>
         </div>
