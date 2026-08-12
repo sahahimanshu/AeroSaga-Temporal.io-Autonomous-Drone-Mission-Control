@@ -10,7 +10,7 @@ function LiveMap() {
  <button
 className="back-button"
   onClick={() => navigate("/dashboard")}>
-   ← Back to Dashboard
+   ←
 </button>
 
     <div className="live-map-page">

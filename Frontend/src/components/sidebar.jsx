@@ -7,7 +7,7 @@ function Sidebar() {
     { icon: "🏠", name: "Dashboard" },
     { icon: "📋", name: "My Missions" },
     { icon: "🗺️", name: "Live Map" },
-    { icon: "🔔", name: "Alerts", badge: 0 },
+    
   ];
 
   return (
@@ -24,18 +24,22 @@ function Sidebar() {
             onClick={() => {
               if (item.name === "Dashboard") {
                 navigate("/dashboard");
+              } else if (item.name === "My Missions") {
+                navigate("/my-missions");
               } else if (item.name === "Live Map") {
                 navigate("/live-map");
               }
             }}
           >
-            <span className="sidebar-icon">{item.icon}</span>
+            <span className="sidebar-icon">
+              {item.icon}
+            </span>
 
             <span className="sidebar-name">
               {item.name}
             </span>
 
-            {item.badge && (
+            {item.badge > 0 && (
               <span className="alert-badge">
                 {item.badge}
               </span>
