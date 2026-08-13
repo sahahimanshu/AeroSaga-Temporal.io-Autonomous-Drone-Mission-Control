@@ -25,3 +25,7 @@ dist-ssr
 
 
 .env
+
+
+# Backend build output
+backend/target/
