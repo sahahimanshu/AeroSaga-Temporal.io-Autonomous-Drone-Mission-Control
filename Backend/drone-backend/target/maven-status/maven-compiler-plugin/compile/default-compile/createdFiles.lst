@@ -1,1 +1,6 @@
+com\aerosaga\worker\WorkerStarter.class
+com\aerosaga\workflow\DroneTakeoffWorkflowImpl.class
 com\aerosaga\App.class
+com\aerosaga\activity\TakeoffActivityImpl.class
+com\aerosaga\workflow\DroneTakeoffWorkflow.class
+com\aerosaga\activity\TakeoffActivity.class
