@@ -2,6 +2,7 @@ package com.aerosaga.worker;
 
 import com.aerosaga.activity.TakeoffActivityImpl;
 import com.aerosaga.workflow.DroneTakeoffWorkflowImpl;
+import com.aerosaga.workflow.MissionSagaWorkflowImpl;
 
 import io.temporal.client.WorkflowClient;
 import io.temporal.serviceclient.WorkflowServiceStubs;
@@ -14,33 +15,29 @@ public class WorkerStarter {
 
     public static void main(String[] args) {
 
-        // Connect to Temporal Server
+        
         WorkflowServiceStubs service =
                 WorkflowServiceStubs.newLocalServiceStubs();
 
-        // Create Temporal Client
         WorkflowClient client =
                 WorkflowClient.newInstance(service);
 
-        // Create Worker Factory
+        
         WorkerFactory factory =
                 WorkerFactory.newInstance(client);
 
-        // Create Worker
         Worker worker =
                 factory.newWorker(TASK_QUEUE);
 
-        // Register Workflow
         worker.registerWorkflowImplementationTypes(
-                DroneTakeoffWorkflowImpl.class
-        );
-
-        // Register Activity
+    DroneTakeoffWorkflowImpl.class,
+    MissionSagaWorkflowImpl.class
+);
+        
         worker.registerActivitiesImplementations(
                 new TakeoffActivityImpl()
         );
 
-        // Start Worker
         factory.start();
 
         System.out.println("🚁 AeroSaga Temporal Worker started!");
