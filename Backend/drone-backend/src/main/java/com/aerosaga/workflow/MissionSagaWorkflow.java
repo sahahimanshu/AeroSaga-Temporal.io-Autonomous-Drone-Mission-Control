@@ -1,4 +1,5 @@
 package com.aerosaga.workflow;
+import io.temporal.workflow.QueryMethod;
 
 import io.temporal.workflow.WorkflowInterface;
 import io.temporal.workflow.WorkflowMethod;
@@ -10,4 +11,6 @@ public interface MissionSagaWorkflow {
 
     @WorkflowMethod
     String executeMission(List<String> droneIds);
+    @QueryMethod
+       String getMissionState();
 }

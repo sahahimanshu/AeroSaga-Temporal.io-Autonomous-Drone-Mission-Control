@@ -11,6 +11,8 @@ import java.util.List;
 
 public class MissionSagaWorkflowImpl implements MissionSagaWorkflow {
 
+    private String missionState = "CREATED";
+
     private final TakeoffActivity takeoffActivity =
             Workflow.newActivityStub(
                     TakeoffActivity.class,
@@ -22,6 +24,8 @@ public class MissionSagaWorkflowImpl implements MissionSagaWorkflow {
     @Override
     public String executeMission(List<String> droneIds) {
 
+        missionState = "TAKEOFF";
+
         List<Promise<String>> takeoffPromises = droneIds.stream()
                 .map(droneId ->
                         Async.function(
@@ -30,10 +34,19 @@ public class MissionSagaWorkflowImpl implements MissionSagaWorkflow {
                 )
                 .toList();
 
+        missionState = "ACTIVE";
+
         Promise.allOf(takeoffPromises).get();
+
+        missionState = "COMPLETED";
 
         return "Mission completed successfully for "
                 + droneIds.size()
                 + " drones.";
+    }
+
+    @Override
+    public String getMissionState() {
+        return missionState;
     }
 }
