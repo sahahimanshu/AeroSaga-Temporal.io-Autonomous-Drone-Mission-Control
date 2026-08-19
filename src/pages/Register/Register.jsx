@@ -361,32 +361,69 @@ function Register() {
     });
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const nextErrors = validateForm(form);
-    setErrors(nextErrors);
-    setTouched({
-      fullName: true,
-      email: true,
-      username: true,
-      phone: true,
-      password: true,
-      confirmPassword: true,
-      termsAccepted: true,
+  const handleSubmit = async (event) => {
+  event.preventDefault();
+
+  const nextErrors = validateForm(form);
+
+  setErrors(nextErrors);
+
+  setTouched({
+    fullName: true,
+    email: true,
+    username: true,
+    phone: true,
+    password: true,
+    confirmPassword: true,
+    termsAccepted: true,
+  });
+
+  if (hasErrors(nextErrors)) return;
+
+  setIsSubmitting(true);
+
+  try {
+    const response = await fetch('http://localhost:8082/api/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: form.fullName,
+        email: form.email,
+        password: form.password,
+        role: 'USER',
+      }),
     });
 
-    if (hasErrors(nextErrors)) return;
+    const data = await response.json();
 
-    setIsSubmitting(true);
-    // Frontend-only for now — structured so a real API call can replace this block later.
-    window.setTimeout(() => {
-      setIsSubmitting(false);
-      navigate('/login', {
-        state: { successMessage: 'Registration successful. Please login to continue.' },
-      });
-    }, 900);
-  };
+    if (!response.ok) {
+      throw new Error(data.message || 'Registration failed');
+    }
 
+    console.log('Registration successful:', data);
+
+    setIsSubmitting(false);
+
+    navigate('/login', {
+      state: {
+        successMessage:
+          'Registration successful. Please login to continue.',
+      },
+    });
+
+  } catch (error) {
+    console.error('Registration error:', error);
+
+    setIsSubmitting(false);
+
+    setErrors((prev) => ({
+      ...prev,
+      email: error.message || 'Registration failed',
+    }));
+  }
+};
   const openTermsModal = () => setActiveLegalModal('terms');
   const openPrivacyModal = () => setActiveLegalModal('privacy');
   const closeLegalModal = () => setActiveLegalModal(null);
