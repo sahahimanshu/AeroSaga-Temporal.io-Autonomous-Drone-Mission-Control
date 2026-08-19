@@ -111,18 +111,18 @@ import SearchBar from "../components/SearchBar";
 import BackToAdminButton from "../components/BackToAdminButton";
 import LiveMap from "../components/LiveMap";
 import SelectedDronePanel from "../components/SelectedDronePanel";
-import { mockDrones } from "../data/mockDrones";
-
+import { useSimulatedTelemetry } from "../hooks/useSimulatedTelemetry";
 const statusOptions = ["All", "Active", "In Progress", "Returning", "Standby"];
 
 export default function Dashboard() {
   const [query, setQuery] = useState("");
   const [activeStatus, setActiveStatus] = useState("All");
+    const liveDrones = useSimulatedTelemetry(2000);
 
   const filteredDrones = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    return mockDrones.filter((drone) => {
+    return liveDrones.filter((drone) => {
       const matchesQuery =
         !normalizedQuery ||
         drone.id.toLowerCase().includes(normalizedQuery) ||
@@ -133,8 +133,7 @@ export default function Dashboard() {
 
       return matchesQuery && matchesStatus;
     });
-  }, [activeStatus, query]);
-
+  }, [liveDrones, activeStatus, query]);
   const droneToShow = filteredDrones[0] || null;
 
   return (
@@ -171,7 +170,7 @@ export default function Dashboard() {
                 ? `Showing ${filteredDrones.length} drone${filteredDrones.length > 1 ? "s" : ""}`
                 : "No drones match the current filters"}
             </p>
-            <LiveMap selectedDroneId={droneToShow?.id} />
+            <LiveMap selectedDroneId={droneToShow?.id} drones={liveDrones} />
           </div>
         </div>
 

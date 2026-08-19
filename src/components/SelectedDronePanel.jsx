@@ -62,8 +62,9 @@ export default function SelectedDronePanel() {
         <div><span className="stat-key">Signal</span><br />{drone.signal}</div>
       </div>
 
-      <div className="drone-location">
-        <span className="stat-key">Location</span><br />{drone.location}
+            <div className="drone-location">
+        <span className="stat-key">Location</span><br />
+        {drone.lat?.toFixed(4)}° N, {drone.lng?.toFixed(4)}° E
       </div>
     </div>
   );
