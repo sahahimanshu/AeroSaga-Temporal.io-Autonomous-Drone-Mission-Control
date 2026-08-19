@@ -8,3 +8,4 @@ com\aerosaga\websocket\TelemetryWebSocketServer.class
 com\aerosaga\worker\WorkerStarter.class
 com\aerosaga\workflow\MissionSagaWorkflow.class
 com\aerosaga\App.class
+com\aerosaga\websocket\TelemetrySimulator.class

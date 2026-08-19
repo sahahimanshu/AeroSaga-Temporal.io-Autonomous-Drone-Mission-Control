@@ -2,6 +2,7 @@ C:\Users\USER\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\dron
 C:\Users\USER\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\activity\TakeoffActivityImpl.java
 C:\Users\USER\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\App.java
 C:\Users\USER\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\websocket\TelemetryServerStarter.java
+C:\Users\USER\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\websocket\TelemetrySimulator.java
 C:\Users\USER\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\websocket\TelemetryWebSocketServer.java
 C:\Users\USER\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\worker\WorkerStarter.java
 C:\Users\USER\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\workflow\DroneTakeoffWorkflow.java

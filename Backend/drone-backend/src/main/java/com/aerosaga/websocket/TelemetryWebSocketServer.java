@@ -36,5 +36,32 @@ public class TelemetryWebSocketServer extends WebSocketServer {
     public void onStart() {
         System.out.println("🚁 Telemetry WebSocket Server started!");
         System.out.println("📡 WebSocket: ws://localhost:8081");
+        new Thread(() -> {
+           double latitude = 22.5726;
+           double longitude = 88.3639;
+           int battery = 100;
+
+           while(true) {
+            latitude += 0.0001;
+            longitude += 0.0001;
+            battery --;
+
+            if(battery <= 20) {
+                battery = 100;
+            }
+            String telemetry = String.format ( "{\"droneId\":\"M-102\",\"latitude\":%.6f,\"longitude\":%.6f,\"altitude\":120,\"battery\":%d,\"status\":\"Online\"}",latitude,longitude,battery);
+            broadcast(telemetry);
+            System.err.println("Sent telemetry :"+telemetry);
+
+            try{
+                Thread.sleep(2000);
+            } catch(InterruptedException e){
+                Thread.currentThread().interrupt();
+                break;
+            }
+           }
+
+
+        }).start();
     }
 }
