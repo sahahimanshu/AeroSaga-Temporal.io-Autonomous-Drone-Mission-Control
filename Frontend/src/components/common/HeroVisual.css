@@ -1,0 +1,20 @@
+.hero-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-visual__svg {
+  width: 100%;
+  height: auto;
+}
+
+.hero-visual--panel {
+  height: 100%;
+  background: linear-gradient(160deg, #0c1220 0%, #0e1a2e 55%, #0a1120 100%);
+}
+
+.hero-visual--inline {
+  max-width: 280px;
+  margin: 0 auto;
+}

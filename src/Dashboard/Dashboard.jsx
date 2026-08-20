@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
-import Brand from '../../components/common/Brand.jsx';
-import Button from '../../components/ui/Button.jsx';
+import Brand from '../components/common/Brand.jsx';
+import Button from '../components/ui/Button.jsx';
 import './Dashboard.css';
 
 /**
