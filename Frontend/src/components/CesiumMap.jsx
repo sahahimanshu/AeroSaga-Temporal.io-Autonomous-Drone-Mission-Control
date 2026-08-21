@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+npm.cmd uninstall vite-plugin-cesiumimport { useEffect, useRef } from "react";
 import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
@@ -11,27 +11,17 @@ function CesiumMap() {
 
     const createMap = async () => {
       if (!containerRef.current) return;
-      Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5YTYzNTZmZS1lYzg4LTRhYWYtODgxOS0yOGRlYmFlMDc1MTEiLCJpZCI6NDY0NTg1LCJzdWIiOiJIaW1hbnNodSBTYWhhIiwiaXNzIjoiaHR0cHM6Ly9hcGkuY2VzaXVtLmNvbSIsImF1ZCI6IkhpbWFuc2h1IFNhaGFfZGVmYXVsdCIsImlhdCI6MTc4NjM1OTYyMn0.WAGHm35KL9RYeQhjHP9LLaqB22Ljj-Y4NkYMPy_F-Ak";
 
       try {
-       
-        const imageryProvider =
-          await Cesium.ArcGisMapServerImageryProvider.fromUrl(
-            "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
-          );
-
-        if (destroyed || !containerRef.current) return;
         viewer = new Cesium.Viewer(containerRef.current, {
-          baseLayer: new Cesium.ImageryLayer(imageryProvider),
-
           animation: false,
           timeline: false,
 
-          baseLayerPicker: true,
-          geocoder: true,
+          baseLayerPicker: false,
+          geocoder: false,
           homeButton: true,
           sceneModePicker: true,
-          navigationHelpButton: true,
+          navigationHelpButton: false,
 
           fullscreenButton: false,
           vrButton: false,
@@ -40,11 +30,11 @@ function CesiumMap() {
           selectionIndicator: true,
 
           shouldAnimate: true,
-
           shadows: false,
         });
 
-        
+        if (destroyed) return;
+
         const dronePosition = Cesium.Cartesian3.fromDegrees(
           77.5946,
           12.9716,
@@ -70,34 +60,23 @@ function CesiumMap() {
 
           point: {
             pixelSize: 14,
-
             color: Cesium.Color.RED,
-
             outlineColor: Cesium.Color.WHITE,
-
             outlineWidth: 3,
           },
 
           label: {
             text: "Drone 1",
-
             font: "bold 14px Arial",
-
             fillColor: Cesium.Color.WHITE,
-
             outlineColor: Cesium.Color.BLACK,
-
             outlineWidth: 3,
-
             style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-
             pixelOffset: new Cesium.Cartesian2(0, -18),
           },
         });
 
-       
         viewer.camera.setView({
           destination: Cesium.Cartesian3.fromDegrees(
             77.5946,
@@ -107,12 +86,11 @@ function CesiumMap() {
 
           orientation: {
             heading: Cesium.Math.toRadians(0),
-
             pitch: Cesium.Math.toRadians(-60),
-
             roll: 0,
           },
         });
+
       } catch (error) {
         console.error("Cesium map failed to initialize:", error);
 
@@ -136,7 +114,7 @@ function CesiumMap() {
                   Map unavailable
                 </h3>
                 <p style="margin:0;color:#9fb3c8;">
-                  Unable to load map imagery.
+                  Cesium map could not be initialized.
                 </p>
               </div>
             </div>
