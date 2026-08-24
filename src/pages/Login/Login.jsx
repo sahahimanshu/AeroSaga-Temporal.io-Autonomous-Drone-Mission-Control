@@ -1,21 +1,25 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { User, LogIn } from 'lucide-react';
+
 import AuthCard from '../../components/common/AuthCard.jsx';
 import Brand from '../../components/common/Brand.jsx';
 import HeroVisual from '../../components/common/HeroVisual.jsx';
 import Alert from '../../components/common/Alert.jsx';
-import SuccessModal from '../../components/common/SuccessModal.jsx';
 import TextField from '../../components/ui/TextField.jsx';
 import PasswordField from '../../components/ui/PasswordField.jsx';
 import Checkbox from '../../components/ui/Checkbox.jsx';
 import Button from '../../components/ui/Button.jsx';
+
 import {
   validateEmailOrUsername,
   validateLoginPassword,
   trimValue,
 } from '../../utils/validators.js';
+
 import './Login.css';
+
+const API_URL = 'http://localhost:8082/api/users/login';
 
 const INITIAL_FORM = {
   emailOrUsername: '',
@@ -37,6 +41,7 @@ function hasErrors(errors) {
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+
   const successMessage = location.state?.successMessage;
 
   const [form, setForm] = useState(INITIAL_FORM);
@@ -44,10 +49,10 @@ function Login() {
   const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
+
     const nextValue = type === 'checkbox' ? checked : value;
 
     setForm((prev) => ({
@@ -56,12 +61,14 @@ function Login() {
     }));
 
     if (touched[name]) {
+      const updatedForm = {
+        ...form,
+        [name]: nextValue,
+      };
+
       setErrors((prev) => ({
         ...prev,
-        ...validateForm({
-          ...form,
-          [name]: nextValue,
-        }),
+        ...validateForm(updatedForm),
       }));
     }
   };
@@ -94,6 +101,7 @@ function Login() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
     setSubmitError('');
 
     const nextErrors = validateForm(form);
@@ -112,54 +120,84 @@ function Login() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(
-        'http://localhost:8082/api/users/login',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: form.emailOrUsername,
-            password: form.password,
-          }),
-        }
-      );
+      /*
+       * Backend currently searches user by EMAIL.
+       */
+      const loginData = {
+        email: form.emailOrUsername.trim(),
+        password: form.password,
+      };
 
-      const data = await response.json();
+      const response = await fetch(API_URL, {
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify(loginData),
+      });
 
       if (!response.ok) {
-        throw new Error(
-          data.message || 'Invalid email or password'
-        );
+        let errorMessage = 'Invalid email or password.';
+
+        try {
+          const errorData = await response.json();
+
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch {
+          // Backend may return non-JSON error.
+        }
+
+        throw new Error(errorMessage);
       }
 
-      console.log('Login successful:', data);
+      const loggedInUser = await response.json();
 
-      // Save logged-in user
-      localStorage.setItem('user', JSON.stringify(data));
+      console.log('Login successful:', loggedInUser);
 
-      // Show success modal
-      setShowSuccessModal(true);
+      /*
+       * Save logged-in user for dashboard.
+       */
+      localStorage.setItem(
+        'aerosagaUser',
+        JSON.stringify(loggedInUser)
+      );
 
+      localStorage.setItem(
+        'loginEmail',
+        loggedInUser.email
+      );
+
+      /*
+       * Go to dashboard only after backend
+       * successfully verifies credentials.
+       */
+      navigate('/dashboard', {
+        replace: true,
+      });
     } catch (error) {
       console.error('Login error:', error);
-      setSubmitError(
-        error.message || 'Login failed. Please try again.'
-      );
+
+      if (error.name === 'TypeError') {
+        setSubmitError(
+          'Unable to connect to the server. Please make sure the backend is running on port 8082.'
+        );
+      } else {
+        setSubmitError(
+          error.message || 'Login failed. Please try again.'
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleContinueAfterLogin = () => {
-    setShowSuccessModal(false);
-    navigate('/dashboard');
-  };
-
   const handleGoogleLogin = () => {
     setSubmitError(
-      'Google sign-in is not yet connected. Please use your email or username.'
+      'Google sign-in is not yet connected. Please use your email and password.'
     );
   };
 
@@ -202,7 +240,7 @@ function Login() {
             name="emailOrUsername"
             label="Email or Username"
             icon={User}
-            placeholder="Enter your email or username"
+            placeholder="Enter your email"
             autoComplete="username"
             value={form.emailOrUsername}
             onChange={handleChange}
@@ -262,6 +300,7 @@ function Login() {
           <Button
             variant="secondary"
             onClick={handleGoogleLogin}
+            type="button"
           >
             Continue with Google
           </Button>
@@ -274,11 +313,6 @@ function Login() {
           </p>
         </form>
       </div>
-
-      <SuccessModal
-        isOpen={showSuccessModal}
-        onContinue={handleContinueAfterLogin}
-      />
     </AuthCard>
   );
 }
