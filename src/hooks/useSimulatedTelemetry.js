@@ -14,8 +14,8 @@ export function useSimulatedTelemetry(intervalMs = 2000) {
         }
 
         // Small random nudge to simulate GPS movement
-        const latDelta = (Math.random() - 0.5) * 0.004;
-        const lngDelta = (Math.random() - 0.5) * 0.004;
+        const latDelta = (Math.random() - 0.5) * 0.02;
+        const lngDelta = (Math.random() - 0.5) * 0.02;
 
         // Battery slowly drains for active drones
         const batteryDrain = drone.status === "Returning" ? 0 : 0.2;

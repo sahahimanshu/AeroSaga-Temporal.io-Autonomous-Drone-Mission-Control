@@ -38,10 +38,11 @@ export default function LiveMap({ selectedDroneId, drones }) {
   // Create or update entities whenever drone data changes
   useEffect(() => {
     const viewer = viewerRef.current;
+    console.log("LiveMap useEffect running. viewer:", !!viewer, "drones:", drones);
     if (!viewer || !drones) return;
 
     drones.forEach((drone) => {
-      const position = Cesium.Cartesian3.fromDegrees(
+      console.log("Adding drone:", drone.id, "lat:", drone.lat, "lng:", drone.lng);      const position = Cesium.Cartesian3.fromDegrees(
         drone.lng,
         drone.lat,
         drone.altitude || 100
@@ -52,21 +53,25 @@ export default function LiveMap({ selectedDroneId, drones }) {
       if (existing) {
         existing.position = position;
       } else {
+
         const entity = viewer.entities.add({
           id: drone.id,
           name: drone.id,
           position: position,
           point: {
-            pixelSize: 12,
-            color: drone.status === "Active" ? Cesium.Color.LIME : Cesium.Color.ORANGE,
+            pixelSize: 40,
+            color: Cesium.Color.RED,
             outlineColor: Cesium.Color.WHITE,
-            outlineWidth: 2,
+            outlineWidth: 4,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            heightReference: Cesium.HeightReference.NONE,
           },
           label: {
             text: drone.id,
-            font: "12px sans-serif",
-            fillColor: Cesium.Color.WHITE,
-            pixelOffset: new Cesium.Cartesian2(0, -20),
+            font: "bold 20px sans-serif",
+            fillColor: Cesium.Color.YELLOW,
+            pixelOffset: new Cesium.Cartesian2(0, -30),
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
           },
         });
         entityMapRef.current[drone.id] = entity;
@@ -89,6 +94,7 @@ export default function LiveMap({ selectedDroneId, drones }) {
 
     Object.values(entityMapRef.current).forEach((entity) => {
       entity.point.pixelSize = 12;
+      entity.point.color = entity.point.color;
       entity.point.outlineColor = Cesium.Color.WHITE;
       entity.point.outlineWidth = 2;
     });
