@@ -35,7 +35,7 @@ public class WorkerStarter {
 );
         
         worker.registerActivitiesImplementations(
-                new TakeoffActivityImpl()
+                new TakeoffActivityImp()
         );
 
         factory.start();
