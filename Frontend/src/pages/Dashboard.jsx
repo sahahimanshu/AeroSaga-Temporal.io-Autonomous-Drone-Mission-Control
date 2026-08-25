@@ -1,10 +1,33 @@
-import React, { useState, useEffect } from "react";
-
+import React, { useEffect, useState } from "react";
 import CesiumMap from "../components/CesiumMap";
 import "./Dashboard.css";
 
 function Dashboard() {
-   const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  // ============================================================
+  // CURRENT DATE AND TIME
+  // ============================================================
+
+  const [currentDateTime, setCurrentDateTime] =
+    useState(new Date());
+
+  // ============================================================
+  // LIVE TELEMETRY
+  // ============================================================
+
+  const [telemetry, setTelemetry] = useState({
+    droneId: "M-102",
+    latitude: 22.5726,
+    longitude: 88.3639,
+    altitude: 120,
+    battery: 100,
+    status: "Connecting",
+  });
+
+  const [lastUpdate, setLastUpdate] = useState(null);
+
+  // ============================================================
+  // CLOCK
+  // ============================================================
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -14,24 +37,140 @@ function Dashboard() {
     return () => clearInterval(timer);
   }, []);
 
-  const date = currentDateTime.toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  // ============================================================
+  // WEBSOCKET TELEMETRY
+  // ============================================================
 
-  const time = currentDateTime.toLocaleTimeString("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
+  useEffect(() => {
+    const socket = new WebSocket(
+      "ws://localhost:8081"
+    );
+
+    socket.onopen = () => {
+      console.log(
+        "Dashboard telemetry WebSocket connected."
+      );
+
+      setTelemetry((previous) => ({
+        ...previous,
+        status: "Online",
+      }));
+    };
+
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+
+        console.log(
+          "Dashboard telemetry:",
+          data
+        );
+
+        setTelemetry((previous) => ({
+          ...previous,
+          ...data,
+        }));
+
+        setLastUpdate(new Date());
+      } catch (error) {
+        console.error(
+          "Invalid dashboard telemetry:",
+          error
+        );
+      }
+    };
+
+    socket.onerror = (error) => {
+      console.error(
+        "Dashboard WebSocket error:",
+        error
+      );
+    };
+
+    socket.onclose = () => {
+      console.log(
+        "Dashboard telemetry WebSocket disconnected."
+      );
+
+      setTelemetry((previous) => ({
+        ...previous,
+        status: "Offline",
+      }));
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, []);
+
+  // ============================================================
+  // DATE / TIME FORMAT
+  // ============================================================
+
+  const date =
+    currentDateTime.toLocaleDateString(
+      "en-IN",
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }
+    );
+
+  const time =
+    currentDateTime.toLocaleTimeString(
+      "en-IN",
+      {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      }
+    );
+
+  // ============================================================
+  // LIVE DRONE STATUS
+  // ============================================================
+
+  const isOnline =
+    telemetry.status?.toLowerCase() ===
+      "online" ||
+    telemetry.status?.toLowerCase() ===
+      "active";
+
+  const activeDrones = isOnline ? 1 : 0;
+
+  const offlineDrones = isOnline ? 0 : 1;
+
+  // ============================================================
+  // LAST UPDATE
+  // ============================================================
+
+  const getLastUpdateText = () => {
+    if (!lastUpdate) {
+      return "Waiting for telemetry";
+    }
+
+    const seconds = Math.floor(
+      (new Date() - lastUpdate) / 1000
+    );
+
+    if (seconds <= 1) {
+      return "Just now";
+    }
+
+    return `${seconds} sec ago`;
+  };
 
   return (
     <div className="dashboard">
 
-      
+      {/* ========================================================
+          TOP BAR
+      ======================================================== */}
+
       <div className="dashboard-topbar">
+
         <div>
           <h1>Dashboard</h1>
           <p>Drone Mission Control</p>
@@ -42,129 +181,219 @@ function Dashboard() {
           {date}
           <small>{time}</small>
         </div>
+
       </div>
 
-
-      
+      {/* ========================================================
+          LIVE STATS
+      ======================================================== */}
 
       <div className="stats-grid">
 
+        {/* TOTAL DRONES */}
+
         <div className="stat-card">
+
           <div className="stat-icon blue">
-          <span className="drone-icon">✈</span>
+            <span className="drone-icon">
+              ✈
+            </span>
           </div>
 
           <div className="stat-content">
+
             <p>Total Drones</p>
-            <h2>50</h2>
-            <span>All registered drones</span>
-          </div>
-        </div>
 
-
-        <div className="stat-card">
-          <div className="stat-icon green">
-            <span className="drone-icon">✈</span>
-          </div>
-
-          <div className="stat-content">
-            <p>Active Drones</p>
             <h2>1</h2>
-            
+
+            <span>
+              Connected telemetry drones
+            </span>
+
           </div>
+
         </div>
 
+        {/* ACTIVE DRONES */}
 
         <div className="stat-card">
-          <div className="stat-icon red">
-            <span className="drone-icon">✈</span>
+
+          <div className="stat-icon green">
+
+            <span className="drone-icon">
+              ✈
+            </span>
+
           </div>
 
           <div className="stat-content">
-            <p>Offline Drones</p>
-            <h2>0</h2>
-            
+
+            <p>Active Drones</p>
+
+            <h2>
+              {activeDrones}
+            </h2>
+
+            <span>
+              {isOnline
+                ? "Drone online"
+                : "No active drone"}
+            </span>
+
           </div>
+
         </div>
 
+        {/* OFFLINE DRONES */}
 
         <div className="stat-card">
+
+          <div className="stat-icon red">
+
+            <span className="drone-icon">
+              ✈
+            </span>
+
+          </div>
+
+          <div className="stat-content">
+
+            <p>Offline Drones</p>
+
+            <h2>
+              {offlineDrones}
+            </h2>
+
+            <span>
+              Current connection status
+            </span>
+
+          </div>
+
+        </div>
+
+        {/* ACTIVE MISSIONS */}
+
+        <div className="stat-card">
+
           <div className="stat-icon purple">
             🚩
           </div>
 
           <div className="stat-content">
+
             <p>Active Missions</p>
-            <h2>7</h2>
-            <span>Currently in progress</span>
+
+            <h2>1</h2>
+
+            <span>
+              Currently in progress
+            </span>
+
           </div>
+
         </div>
 
+        {/* BATTERY */}
 
         <div className="stat-card">
+
           <div className="stat-icon yellow">
             🔋
           </div>
 
           <div className="stat-content">
+
             <p>Avg. Battery</p>
-            <h2>87%</h2>
-            <span>Fleet average</span>
+
+            <h2>
+              {telemetry.battery}%
+            </h2>
+
+            <span>
+              Live fleet battery
+            </span>
+
           </div>
+
         </div>
 
       </div>
 
-
-      
+      {/* ========================================================
+          MAP + MISSIONS
+      ======================================================== */}
 
       <div className="dashboard-grid">
 
+        {/* LIVE MAP */}
 
         <section className="map-card">
 
           <div className="card-header">
+
             <div>
+
               <h2>Live Map</h2>
-              <span>Real-time drone locations</span>
+
+              <span>
+                Real-time drone locations
+              </span>
+
             </div>
 
             <div className="live-indicator">
-               <span></span>
-                LIVE
+
+              <span></span>
+
+              LIVE
+
             </div>
+
           </div>
 
           <div className="map-wrapper">
+
             <CesiumMap />
+
           </div>
 
         </section>
 
-
-        
+        {/* RECENT MISSIONS */}
 
         <section className="missions-card">
 
           <div className="card-header">
+
             <div>
+
               <h2>Recent Missions</h2>
-              <span>Latest mission activity</span>
+
+              <span>
+                Latest mission activity
+              </span>
+
             </div>
 
             <button className="view-button">
               View All
             </button>
-          </div>
 
+          </div>
 
           <div className="mission-list">
 
             <div className="mission-row">
 
               <div className="mission-info">
+
                 <strong>M-104</strong>
-                <span>Survey Mission</span>
+
+                <span>
+                  Survey Mission
+                </span>
+
               </div>
 
               <span className="mission-status progress">
@@ -173,12 +402,16 @@ function Dashboard() {
 
             </div>
 
-
             <div className="mission-row">
 
               <div className="mission-info">
+
                 <strong>M-103</strong>
-                <span>Mapping Mission</span>
+
+                <span>
+                  Mapping Mission
+                </span>
+
               </div>
 
               <span className="mission-status completed">
@@ -187,26 +420,34 @@ function Dashboard() {
 
             </div>
 
-
             <div className="mission-row">
 
               <div className="mission-info">
+
                 <strong>M-102</strong>
-                <span>Inspection Mission</span>
+
+                <span>
+                  Inspection Mission
+                </span>
+
               </div>
 
-              <span className="mission-status completed">
-                Completed
+              <span className="mission-status progress">
+                In Progress
               </span>
 
             </div>
 
-
             <div className="mission-row">
 
               <div className="mission-info">
+
                 <strong>M-101</strong>
-                <span>Delivery Mission</span>
+
+                <span>
+                  Delivery Mission
+                </span>
+
               </div>
 
               <span className="mission-status failed">
@@ -221,105 +462,97 @@ function Dashboard() {
 
       </div>
 
-
-      
+      {/* ========================================================
+          LOWER GRID
+      ======================================================== */}
 
       <div className="lower-grid">
 
-        
+        {/* ======================================================
+            DRONE FLEET
+        ====================================================== */}
 
         <section className="data-card">
 
           <div className="card-header">
+
             <div>
+
               <h2>Drone Fleet</h2>
-              <span>Current fleet status</span>
+
+              <span>
+                Current fleet status
+              </span>
+
             </div>
 
             <button className="view-button">
               View All
             </button>
-          </div>
 
+          </div>
 
           <div className="table-container">
 
             <table>
 
               <thead>
+
                 <tr>
+
                   <th>Drone ID</th>
+
                   <th>Status</th>
+
                   <th>Battery</th>
+
                   <th>Location</th>
+
                   <th>Last Update</th>
+
                 </tr>
+
               </thead>
 
               <tbody>
 
                 <tr>
-                  <td>AG-001</td>
+
                   <td>
-                    <span className="table-status active">
-                      ● Active
-                    </span>
+                    {telemetry.droneId}
                   </td>
-                  <td>92%</td>
-                  <td>Sector A</td>
-                  <td>1 min ago</td>
-                </tr>
 
-
-                <tr>
-                  <td>AG-002</td>
                   <td>
-                    <span className="table-status active">
-                      ● Active
+
+                    <span
+                      className={
+                        isOnline
+                          ? "table-status active"
+                          : "table-status offline"
+                      }
+                    >
+
+                      ●{" "}
+                      {telemetry.status}
+
                     </span>
+
                   </td>
-                  <td>84%</td>
-                  <td>Sector B</td>
-                  <td>1 min ago</td>
-                </tr>
 
-
-                <tr>
-                  <td>AG-003</td>
                   <td>
-                    <span className="table-status active">
-                      ● Active
-                    </span>
+                    {telemetry.battery}%
                   </td>
-                  <td>76%</td>
-                  <td>Sector C</td>
-                  <td>2 min ago</td>
-                </tr>
 
-
-                <tr>
-                  <td>AG-007</td>
                   <td>
-                    <span className="table-status warning">
-                      ● Low Battery
-                    </span>
+                    {telemetry.latitude.toFixed(4)},
+                    {" "}
+                    {telemetry.longitude.toFixed(4)}
                   </td>
-                  <td>23%</td>
-                  <td>Maintenance Zone</td>
-                  <td>3 min ago</td>
-                </tr>
 
-
-                <tr>
-                  <td>AG-011</td>
                   <td>
-                    <span className="table-status offline">
-                      ● Offline
-                    </span>
+                    {getLastUpdateText()}
                   </td>
-                  <td>0%</td>
-                  <td>Hangar 02</td>
-                  <td>10 min ago</td>
+
                 </tr>
 
               </tbody>
@@ -330,16 +563,22 @@ function Dashboard() {
 
         </section>
 
-
-        
+        {/* ======================================================
+            SYSTEM ALERTS
+        ====================================================== */}
 
         <section className="data-card">
 
           <div className="card-header">
 
             <div>
+
               <h2>System Alerts</h2>
-              <span>Important notifications</span>
+
+              <span>
+                Important notifications
+              </span>
+
             </div>
 
             <button className="view-button">
@@ -348,23 +587,104 @@ function Dashboard() {
 
           </div>
 
-
           <div className="alerts-list">
 
-            <div className="alert-item danger">
+            {/* LOW BATTERY ALERT */}
 
-              <div className="alert-icon">
-                ⚠
+            {telemetry.battery <= 20 && (
+
+              <div className="alert-item danger">
+
+                <div className="alert-icon">
+                  ⚠
+                </div>
+
+                <div>
+
+                  <strong>
+                    Low Battery:{" "}
+                    {telemetry.droneId}
+                  </strong>
+
+                  <span>
+                    Battery level critical:{" "}
+                    {telemetry.battery}%
+                  </span>
+
+                  <small>
+                    {getLastUpdateText()}
+                  </small>
+
+                </div>
+
               </div>
 
-              <div>
-                <strong>Low Battery: AG-007</strong>
-                <span>Battery level critical: 23%</span>
-                <small>2 min ago</small>
+            )}
+
+            {/* CONNECTION ALERT */}
+
+            {!isOnline && (
+
+              <div className="alert-item danger">
+
+                <div className="alert-icon">
+                  ⚠
+                </div>
+
+                <div>
+
+                  <strong>
+                    Drone Offline
+                  </strong>
+
+                  <span>
+                    {telemetry.droneId} is
+                    currently offline.
+                  </span>
+
+                  <small>
+                    Waiting for connection
+                  </small>
+
+                </div>
+
               </div>
 
-            </div>
+            )}
 
+            {/* NORMAL TELEMETRY */}
+
+            {isOnline &&
+              telemetry.battery > 20 && (
+
+                <div className="alert-item info">
+
+                  <div className="alert-icon">
+                    ℹ
+                  </div>
+
+                  <div>
+
+                    <strong>
+                      Telemetry Connected
+                    </strong>
+
+                    <span>
+                      {telemetry.droneId} is
+                      sending live telemetry.
+                    </span>
+
+                    <small>
+                      {getLastUpdateText()}
+                    </small>
+
+                  </div>
+
+                </div>
+
+              )}
+
+            {/* MISSION ALERT */}
 
             <div className="alert-item warning">
 
@@ -373,13 +693,25 @@ function Dashboard() {
               </div>
 
               <div>
-                <strong>Mission M-104</strong>
-                <span>Connection unstable at waypoint 5</span>
-                <small>5 min ago</small>
+
+                <strong>
+                  Mission M-104
+                </strong>
+
+                <span>
+                  Connection unstable at
+                  waypoint 5
+                </span>
+
+                <small>
+                  5 min ago
+                </small>
+
               </div>
 
             </div>
 
+            {/* MAINTENANCE */}
 
             <div className="alert-item info">
 
@@ -388,24 +720,20 @@ function Dashboard() {
               </div>
 
               <div>
-                <strong>Maintenance Due</strong>
-                <span>AG-015 maintenance in 2 days</span>
-                <small>1 hour ago</small>
-              </div>
 
-            </div>
+                <strong>
+                  Maintenance Due
+                </strong>
 
+                <span>
+                  AG-015 maintenance in
+                  2 days
+                </span>
 
-            <div className="alert-item info">
+                <small>
+                  1 hour ago
+                </small>
 
-              <div className="alert-icon">
-                ℹ
-              </div>
-
-              <div>
-                <strong>Weather Update</strong>
-                <span>Heavy rain expected in Sector B</span>
-                <small>2 hours ago</small>
               </div>
 
             </div>
