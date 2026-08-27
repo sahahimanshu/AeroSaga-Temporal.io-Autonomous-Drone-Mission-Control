@@ -6,15 +6,19 @@ function CesiumMap() {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    let viewer;
+    let viewer = null;
+    let socket = null;
     let destroyed = false;
-    let socket;
+
+    const droneEntities = new Map();
 
     const createMap = async () => {
-      if (!containerRef.current) return;
+      if (!containerRef.current) {
+        return;
+      }
 
       Cesium.Ion.defaultAccessToken =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5YTYzNTZmZS1lYzg4LTRhYWYtODgxOS0yOGRlYmFlMDc1MTEiLCJpZCI6NDY0NTg1LCJzdWIiOiJIaW1hbnNodSBTYWhhIiwiaXNzIjoiaHR0cHM6Ly9hcGkuY2VzaXVtLmNvbSIsImF1ZCI6IkhpbWFuc2h1IFNhaGFfZGVmYXVsdCIsImlhdCI6MTc4NjM1OTYyMn0.WAGHm35KL9RYeQhjHP9LLaqB22Ljj-Y4NkYMPy_F-Ak";
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5YTYzNTZmZS1lYzg4LTRhYWYtODgxOS0yOGRlYmFlMDc1MTEiLCJpZCI6NDY0NTg1LCJzdWIiOiJIaW1hbnNodSBTYWhhIiwiaXNzIjoiaHR0cHM6Ly9hcGkuY2VzaXVtLmNvbSIsImF1ZCI6IkhpbWFuc2h1IFNhaGFfZGVmYXVsdCIsImlhdCI6MTc4NjM5NTYyMn0.WAGHm35KL9RYeQhjHP9LLaqB22Ljj-Y4NkYMPy_F-Ak";
 
       try {
         const imageryProvider =
@@ -22,7 +26,9 @@ function CesiumMap() {
             "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
           );
 
-        if (destroyed || !containerRef.current) return;
+        if (destroyed || !containerRef.current) {
+          return;
+        }
 
         viewer = new Cesium.Viewer(containerRef.current, {
           baseLayer: new Cesium.ImageryLayer(imageryProvider),
@@ -46,73 +52,20 @@ function CesiumMap() {
           shadows: false,
         });
 
-        // Initial position of M-102
-        const initialPosition = Cesium.Cartesian3.fromDegrees(
-          88.3639,
-          22.5726,
-          120
-        );
-
-        const droneEntity = viewer.entities.add({
-          id: "drone-M-102",
-
-          name: "M-102",
-
-          description: `
-            <div style="font-family: Arial;">
-              <h3>Drone M-102</h3>
-              <p><strong>Status:</strong> Online</p>
-              <p><strong>Altitude:</strong> 120 m</p>
-              <p><strong>Latitude:</strong> 22.5726</p>
-              <p><strong>Longitude:</strong> 88.3639</p>
-              <p><strong>Battery:</strong> 100%</p>
-            </div>
-          `,
-
-          position: initialPosition,
-
-          point: {
-            pixelSize: 14,
-            color: Cesium.Color.RED,
-            outlineColor: Cesium.Color.WHITE,
-            outlineWidth: 3,
-          },
-
-          label: {
-            text: "M-102",
-
-            font: "bold 14px Arial",
-
-            fillColor: Cesium.Color.WHITE,
-
-            outlineColor: Cesium.Color.BLACK,
-
-            outlineWidth: 3,
-
-            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-
-            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-
-            pixelOffset: new Cesium.Cartesian2(0, -18),
-          },
-        });
-
-        // Camera
         viewer.camera.setView({
           destination: Cesium.Cartesian3.fromDegrees(
-            88.3639,
-            22.5726,
-            12000
+            78.9629,
+            22.5937,
+            2500000
           ),
 
           orientation: {
             heading: Cesium.Math.toRadians(0),
-            pitch: Cesium.Math.toRadians(-60),
+            pitch: Cesium.Math.toRadians(-90),
             roll: 0,
           },
         });
 
-        // WebSocket
         socket = new WebSocket("ws://localhost:8081");
 
         socket.onopen = () => {
@@ -125,58 +78,197 @@ function CesiumMap() {
 
             console.log("Cesium telemetry:", telemetry);
 
-            if (telemetry.droneId !== "M-102") {
-              return;
-            }
+            const droneId = telemetry.droneId;
 
             const latitude = Number(telemetry.latitude);
             const longitude = Number(telemetry.longitude);
             const altitude = Number(telemetry.altitude);
             const battery = Number(telemetry.battery);
 
+            if (!droneId) {
+              return;
+            }
+
             if (
               Number.isNaN(latitude) ||
               Number.isNaN(longitude) ||
-              Number.isNaN(altitude)
+              Number.isNaN(altitude) ||
+              Number.isNaN(battery)
             ) {
               return;
             }
 
-            // Move M-102
-            droneEntity.position = Cesium.Cartesian3.fromDegrees(
-              longitude,
-              latitude,
-              altitude
-            );
+            let droneEntity = droneEntities.get(droneId);
 
-            // Update information
+            if (!droneEntity) {
+              console.log("Creating drone:", droneId);
+
+              droneEntity = viewer.entities.add({
+                id: `drone-${droneId}`,
+
+                name: droneId,
+
+                position: Cesium.Cartesian3.fromDegrees(
+                  longitude,
+                  latitude,
+                  altitude
+                ),
+
+                point: {
+                  pixelSize: 10,
+
+                  color: Cesium.Color.LIME,
+
+                  outlineColor: Cesium.Color.WHITE,
+
+                  outlineWidth: 2,
+                },
+
+                label: {
+                  text: `${droneId} | ${battery}%`,
+
+                  font: "bold 11px Arial",
+
+                  fillColor: Cesium.Color.WHITE,
+
+                  outlineColor: Cesium.Color.BLACK,
+
+                  outlineWidth: 2,
+
+                  style:
+                    Cesium.LabelStyle.FILL_AND_OUTLINE,
+
+                  verticalOrigin:
+                    Cesium.VerticalOrigin.BOTTOM,
+
+                  pixelOffset:
+                    new Cesium.Cartesian2(0, -14),
+
+                  showBackground: false,
+
+                  disableDepthTestDistance:
+                    Number.POSITIVE_INFINITY,
+                },
+
+                description: `
+                  <div style="font-family: Arial;">
+                    <h3>Drone ${droneId}</h3>
+
+                    <p>
+                      <strong>Status:</strong>
+                      ${telemetry.status}
+                    </p>
+
+                    <p>
+                      <strong>Altitude:</strong>
+                      ${altitude} m
+                    </p>
+
+                    <p>
+                      <strong>Latitude:</strong>
+                      ${latitude}
+                    </p>
+
+                    <p>
+                      <strong>Longitude:</strong>
+                      ${longitude}
+                    </p>
+
+                    <p>
+                      <strong>Battery:</strong>
+                      ${battery}%
+                    </p>
+                  </div>
+                `,
+              });
+
+              droneEntities.set(
+                droneId,
+                droneEntity
+              );
+
+              console.log(
+                "Total drones:",
+                droneEntities.size
+              );
+            }
+
+            droneEntity.position =
+              Cesium.Cartesian3.fromDegrees(
+                longitude,
+                latitude,
+                altitude
+              );
+
+            droneEntity.label.text =
+              `${droneId} | ${battery}%`;
+
             droneEntity.description = `
               <div style="font-family: Arial;">
-                <h3>Drone M-102</h3>
-                <p><strong>Status:</strong> ${telemetry.status}</p>
-                <p><strong>Altitude:</strong> ${altitude} m</p>
-                <p><strong>Latitude:</strong> ${latitude}</p>
-                <p><strong>Longitude:</strong> ${longitude}</p>
-                <p><strong>Battery:</strong> ${battery}%</p>
+                <h3>Drone ${droneId}</h3>
+
+                <p>
+                  <strong>Status:</strong>
+                  ${telemetry.status}
+                </p>
+
+                <p>
+                  <strong>Altitude:</strong>
+                  ${altitude} m
+                </p>
+
+                <p>
+                  <strong>Latitude:</strong>
+                  ${latitude}
+                </p>
+
+                <p>
+                  <strong>Longitude:</strong>
+                  ${longitude}
+                </p>
+
+                <p>
+                  <strong>Battery:</strong>
+                  ${battery}%
+                </p>
               </div>
             `;
 
-            // Update label
-            droneEntity.label.text = `M-102 | ${battery}%`;
+            if (battery <= 20) {
+              droneEntity.point.color =
+                Cesium.Color.RED;
+            } else if (battery <= 50) {
+              droneEntity.point.color =
+                Cesium.Color.YELLOW;
+            } else {
+              droneEntity.point.color =
+                Cesium.Color.LIME;
+            }
           } catch (error) {
-            console.error("Telemetry parsing error:", error);
+            console.error(
+              "Telemetry parsing error:",
+              error
+            );
           }
         };
 
         socket.onerror = (error) => {
-          console.error("Cesium WebSocket error:", error);
+          console.error(
+            "Cesium WebSocket error:",
+            error
+          );
         };
 
         socket.onclose = () => {
-          console.log("Cesium WebSocket disconnected");
+          console.log(
+            "Cesium WebSocket disconnected"
+          );
         };
       } catch (error) {
-        console.error("Cesium map failed to initialize:", error);
+        console.error(
+          "Cesium map failed to initialize:",
+          error
+        );
       }
     };
 
@@ -192,6 +284,8 @@ function CesiumMap() {
       if (viewer && !viewer.isDestroyed()) {
         viewer.destroy();
       }
+
+      droneEntities.clear();
     };
   }, []);
 
@@ -199,6 +293,10 @@ function CesiumMap() {
     <div
       ref={containerRef}
       className="cesium-map-container"
+      style={{
+        width: "100%",
+        height: "100%",
+      }}
     />
   );
 }
