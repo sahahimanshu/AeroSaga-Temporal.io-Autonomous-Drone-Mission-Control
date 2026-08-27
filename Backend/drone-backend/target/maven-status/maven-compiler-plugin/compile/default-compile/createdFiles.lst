@@ -1,5 +1,4 @@
-com\aerosaga\workflow\DroneTakeoffWorkflowImpl.class
-com\aerosaga\workflow\MissionSagaWorkflowImpl.class
+com\aerosaga\workflow\ResilientDroneWorkflow.class
 com\aerosaga\activity\TakeoffActivityImpl.class
 com\aerosaga\workflow\DroneTakeoffWorkflow.class
 com\aerosaga\activity\TakeoffActivity.class
@@ -8,4 +7,8 @@ com\aerosaga\websocket\TelemetryWebSocketServer.class
 com\aerosaga\worker\WorkerStarter.class
 com\aerosaga\workflow\MissionSagaWorkflow.class
 com\aerosaga\App.class
+com\aerosaga\workflow\ResilientDroneWorkflowInterface.class
+com\aerosaga\workflow\DroneTakeoffWorkflowImpl.class
+com\aerosaga\workflow\MissionSagaWorkflowImpl.class
+com\aerosaga\ResilientDroneWorkflowStarter.class
 com\aerosaga\websocket\TelemetrySimulator.class

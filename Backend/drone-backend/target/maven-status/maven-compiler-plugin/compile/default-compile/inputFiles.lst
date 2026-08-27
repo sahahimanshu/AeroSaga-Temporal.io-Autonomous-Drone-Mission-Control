@@ -1,6 +1,7 @@
 C:\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\activity\TakeoffActivity.java
 C:\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\activity\TakeoffActivityImpl.java
 C:\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\App.java
+C:\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\ResilientDroneWorkflowStarter.java
 C:\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\websocket\TelemetryServerStarter.java
 C:\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\websocket\TelemetrySimulator.java
 C:\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\websocket\TelemetryWebSocketServer.java
@@ -9,3 +10,5 @@ C:\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\s
 C:\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\workflow\DroneTakeoffWorkflowImpl.java
 C:\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\workflow\MissionSagaWorkflow.java
 C:\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\workflow\MissionSagaWorkflowImpl.java
+C:\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\workflow\ResilientDroneWorkflow.java
+C:\AeroSaga-Temporal.io-Autonomous-Drone-Mission-Control\Backend\drone-backend\src\main\java\com\aerosaga\workflow\ResilientDroneWorkflowInterface.java

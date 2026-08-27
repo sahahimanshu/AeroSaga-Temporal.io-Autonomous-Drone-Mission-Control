@@ -1,5 +1,5 @@
 package com.aerosaga.worker;
-
+import com.aerosaga.workflow.ResilientDroneWorkflow;
 import com.aerosaga.activity.TakeoffActivityImpl;
 import com.aerosaga.workflow.DroneTakeoffWorkflowImpl;
 import com.aerosaga.workflow.MissionSagaWorkflowImpl;
@@ -31,7 +31,8 @@ public class WorkerStarter {
 
         worker.registerWorkflowImplementationTypes(
     DroneTakeoffWorkflowImpl.class,
-    MissionSagaWorkflowImpl.class
+    MissionSagaWorkflowImpl.class,
+    ResilientDroneWorkflow.class
 );
         
         worker.registerActivitiesImplementations(
