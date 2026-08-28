@@ -4,11 +4,6 @@ import "./Dashboard.css";
 
 const TOTAL_DRONES = 50;
 const TELEMETRY_TIMEOUT = 5000;
-
-// ============================================================
-// INITIAL DRONES
-// ============================================================
-
 const createInitialDrones = () => {
   return Array.from({ length: TOTAL_DRONES }, (_, index) => {
     const id = `M-${String(index + 1).padStart(2, "0")}`;
@@ -31,11 +26,6 @@ const createInitialDrones = () => {
     };
   });
 };
-
-// ============================================================
-// DASHBOARD
-// ============================================================
-
 function Dashboard() {
   const [drones, setDrones] = useState(createInitialDrones);
 
@@ -44,17 +34,11 @@ function Dashboard() {
 
   const [socketStatus, setSocketStatus] =
     useState("CONNECTING");
-
-  // ==========================================================
-  // CLOCK
-  // ==========================================================
-
-  useEffect(() => {
+    
+    useEffect(() => {
     const timer = setInterval(() => {
       setCurrentDateTime(new Date());
-
-      // Check whether drones are still receiving telemetry
-      setDrones((previousDrones) => {
+       setDrones((previousDrones) => {
         const now = Date.now();
 
         return previousDrones.map((drone) => {
@@ -79,12 +63,7 @@ function Dashboard() {
 
     return () => clearInterval(timer);
   }, []);
-
-  // ==========================================================
-  // WEBSOCKET
-  // ==========================================================
-
-  useEffect(() => {
+   useEffect(() => {
     let socket = null;
     let reconnectTimer = null;
     let destroyed = false;
@@ -100,10 +79,7 @@ function Dashboard() {
         "ws://localhost:8081"
       );
 
-      // ------------------------------------------------------
-      // CONNECTED
-      // ------------------------------------------------------
-
+      
       socket.onopen = () => {
         console.log(
           "Dashboard WebSocket connected"
@@ -112,9 +88,7 @@ function Dashboard() {
         setSocketStatus("LIVE");
       };
 
-      // ------------------------------------------------------
-      // TELEMETRY
-      // ------------------------------------------------------
+     
 
       socket.onmessage = (event) => {
         try {
@@ -131,9 +105,7 @@ function Dashboard() {
 
           if (!rawId) return;
 
-          // ----------------------------------------------------
-          // GET DRONE NUMBER
-          // ----------------------------------------------------
+         
 
           const match =
             String(rawId).match(/(\d+)/);
@@ -150,17 +122,14 @@ function Dashboard() {
             return;
           }
 
-          // AG-001 -> M-01
-          // M-01   -> M-01
+          
           const id =
             `M-${String(droneNumber).padStart(
               2,
               "0"
             )}`;
 
-          // ----------------------------------------------------
-          // TELEMETRY VALUES
-          // ----------------------------------------------------
+         
 
           const latitude = Number(
             raw.latitude ??
@@ -184,9 +153,7 @@ function Dashboard() {
             raw.battery
           );
 
-          // ----------------------------------------------------
-          // BATTERY
-          // ----------------------------------------------------
+          
 
           const safeBattery =
             Number.isNaN(battery)
@@ -199,9 +166,7 @@ function Dashboard() {
                   )
                 );
 
-          // ----------------------------------------------------
-          // LOCATION
-          // ----------------------------------------------------
+          
 
           const location =
             raw.location ??
@@ -210,17 +175,9 @@ function Dashboard() {
               65 + ((droneNumber - 1) % 5)
             )}`;
 
-          // ----------------------------------------------------
-          // MISSION
-          // ----------------------------------------------------
+         const mission = "-";
 
-          // We don't display missions in the fleet table.
-          // Keeping "-" here avoids unnecessary mission data.
-          const mission = "-";
-
-          // ----------------------------------------------------
-          // UPDATE DRONE
-          // ----------------------------------------------------
+       
 
           setDrones((previousDrones) => {
             return previousDrones.map(
@@ -274,11 +231,7 @@ function Dashboard() {
         }
       };
 
-      // ------------------------------------------------------
-      // ERROR
-      // ------------------------------------------------------
-
-      socket.onerror = (error) => {
+       socket.onerror = (error) => {
         console.error(
           "Dashboard WebSocket error:",
           error
@@ -287,10 +240,7 @@ function Dashboard() {
         setSocketStatus("OFFLINE");
       };
 
-      // ------------------------------------------------------
-      // CLOSE
-      // ------------------------------------------------------
-
+     
       socket.onclose = () => {
         console.log(
           "Dashboard WebSocket disconnected"
@@ -321,20 +271,12 @@ function Dashboard() {
     };
   }, []);
 
-  // ==========================================================
-  // ACTIVE DRONES
-  // ==========================================================
-
   const activeDrones = useMemo(() => {
     return drones.filter(
       (drone) =>
         drone.status === "ACTIVE"
     ).length;
   }, [drones]);
-
-  // ==========================================================
-  // OFFLINE DRONES
-  // ==========================================================
 
   const offlineDrones = useMemo(() => {
     return drones.filter(
@@ -343,10 +285,6 @@ function Dashboard() {
     );
   }, [drones]);
 
-  // ==========================================================
-  // LOW BATTERY
-  // ==========================================================
-
   const lowBatteryDrones = useMemo(() => {
     return drones.filter(
       (drone) =>
@@ -354,10 +292,6 @@ function Dashboard() {
         drone.status !== "OFFLINE"
     );
   }, [drones]);
-
-  // ==========================================================
-  // AVERAGE BATTERY
-  // ==========================================================
 
   const averageBattery = useMemo(() => {
     if (!drones.length) return 0;
@@ -373,10 +307,6 @@ function Dashboard() {
     );
   }, [drones]);
 
-  // ==========================================================
-  // DATE
-  // ==========================================================
-
   const date =
     currentDateTime.toLocaleDateString(
       "en-IN",
@@ -386,10 +316,6 @@ function Dashboard() {
         year: "numeric",
       }
     );
-
-  // ==========================================================
-  // TIME
-  // ==========================================================
 
   const time =
     currentDateTime.toLocaleTimeString(
@@ -402,9 +328,7 @@ function Dashboard() {
       }
     );
 
-  // ==========================================================
-  // LAST UPDATE TEXT
-  // ==========================================================
+  
 
   const getLastUpdate = (drone) => {
     if (!drone.lastUpdateMs) {
@@ -428,17 +352,12 @@ function Dashboard() {
     return `${seconds} sec ago`;
   };
 
-  // ==========================================================
-  // RENDER
-  // ==========================================================
+
 
   return (
     <div className="dashboard">
 
-      {/* ====================================================
-          TOP BAR
-      ==================================================== */}
-
+  
       <div className="dashboard-topbar">
 
         <div>
@@ -472,9 +391,6 @@ function Dashboard() {
 
       </div>
 
-      {/* ====================================================
-          STATS
-      ==================================================== */}
 
       <div className="stats-grid">
 
@@ -530,7 +446,7 @@ function Dashboard() {
 
         </div>
 
-        {/* OFFLINE */}
+    
 
         <div className="stat-card">
 
@@ -556,7 +472,6 @@ function Dashboard() {
 
         </div>
 
-        {/* ACTIVE MISSIONS */}
 
         <div className="stat-card">
 
@@ -578,7 +493,7 @@ function Dashboard() {
 
         </div>
 
-        {/* BATTERY */}
+    
 
         <div className="stat-card">
 
@@ -604,9 +519,7 @@ function Dashboard() {
 
       </div>
 
-      {/* ====================================================
-          MAP ONLY
-      ==================================================== */}
+      
 
       <div className="dashboard-grid">
 
@@ -656,15 +569,9 @@ function Dashboard() {
 
       </div>
 
-      {/* ====================================================
-          FLEET + ALERTS
-      ==================================================== */}
+      
 
       <div className="lower-grid">
-
-        {/* ==================================================
-            DRONE FLEET
-        ================================================== */}
 
         <section className="data-card">
 
@@ -887,9 +794,6 @@ function Dashboard() {
 
         </section>
 
-        {/* ==================================================
-            SYSTEM ALERTS
-        ================================================== */}
 
         <section className="data-card">
 
