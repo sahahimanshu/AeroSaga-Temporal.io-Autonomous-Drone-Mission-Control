@@ -8,6 +8,7 @@ com\aerosaga\worker\WorkerStarter.class
 com\aerosaga\workflow\MissionSagaWorkflow.class
 com\aerosaga\App.class
 com\aerosaga\workflow\ResilientDroneWorkflowInterface.class
+com\aerosaga\websocket\TelemetryWebSocketServer$Drone.class
 com\aerosaga\workflow\DroneTakeoffWorkflowImpl.class
 com\aerosaga\workflow\MissionSagaWorkflowImpl.class
 com\aerosaga\ResilientDroneWorkflowStarter.class
