@@ -754,7 +754,7 @@ function Dashboard() {
 
                       </td>
 
-                      {/* LOCATION */}
+                     
 
                       <td>
 
@@ -775,7 +775,6 @@ function Dashboard() {
 
                       </td>
 
-                      {/* LAST UPDATE */}
 
                       <td>
                         {getLastUpdate(drone)}
@@ -819,7 +818,7 @@ function Dashboard() {
 
           <div className="alerts-list">
 
-            {/* LOW BATTERY */}
+          
 
             {lowBatteryDrones.length > 0 && (
 
@@ -859,7 +858,7 @@ function Dashboard() {
 
             )}
 
-            {/* OFFLINE */}
+            
 
             {offlineDrones.length > 0 && (
 
@@ -895,7 +894,6 @@ function Dashboard() {
 
             )}
 
-            {/* WEATHER */}
 
             <div className="alert-item info">
 
