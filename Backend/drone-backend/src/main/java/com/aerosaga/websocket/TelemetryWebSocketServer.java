@@ -11,9 +11,7 @@ import java.util.Random;
 
 public class TelemetryWebSocketServer extends WebSocketServer {
 
-    // ============================================================
-    // CONFIGURATION
-    // ============================================================
+   
 
     private static final int TOTAL_DRONES = 50;
 
@@ -22,9 +20,6 @@ public class TelemetryWebSocketServer extends WebSocketServer {
     private static final Random RANDOM = new Random();
 
 
-    // ============================================================
-    // DRONE DATA
-    // ============================================================
 
     private static class Drone {
 
@@ -78,43 +73,38 @@ public class TelemetryWebSocketServer extends WebSocketServer {
     }
 
 
-    // ============================================================
-    // DRONE LIST
-    // ============================================================
+
 
     private final List<Drone> drones =
             new ArrayList<>();
 
 
-    // ============================================================
-    // INDIA LOCATIONS
-    // ============================================================
-
+    
     private static final double[][] INDIA_LOCATIONS = {
 
-            {28.6139, 77.2090},   // Delhi
-            {19.0760, 72.8777},   // Mumbai
-            {13.0827, 80.2707},   // Chennai
-            {22.5726, 88.3639},   // Kolkata
-            {12.9716, 77.5946},   // Bengaluru
+            {28.6139, 77.2090}, 
+            {19.0760, 72.8777},  
+            {13.0827, 80.2707},  
+            {22.5726, 88.3639},  
+            {12.9716, 77.5946},  
 
-            {17.3850, 78.4867},   // Hyderabad
-            {23.0225, 72.5714},   // Ahmedabad
-            {26.9124, 75.7873},   // Jaipur
-            {11.0168, 76.9558},   // Coimbatore
-            {9.9312, 76.2673},    // Kochi
+            {17.3850, 78.4867},   
+            {23.0225, 72.5714},   
+            {26.9124, 75.7873},   
+            {11.0168, 76.9558},   
+            {9.9312, 76.2673},    
 
-            {8.5241, 76.9366},    // Thiruvananthapuram
-            {11.2588, 75.7804},   // Kozhikode
-            {15.3173, 75.7139},   // Karnataka
-            {15.8497, 74.4977},   // Belagavi
-            {16.5062, 80.6480},   // Vijayawada
+            {8.5241, 76.9366},    
+            {11.2588, 75.7804},   
+            {15.3173, 75.7139},  
+            {15.8497, 74.4977},  
+            {16.5062, 80.6480},   
 
             {22.5726, 88.3639},
-            {25.5941, 85.1376},   // Patna
-            {26.1445, 91.7362},   // Guwahati
-            {24.8170, 92.7870},   // Assam
-            {27.3389, 88.6065},   // Sikkim
+            {25.5941, 85.1376},  
+            {26.1445, 91.7362},   
+            {24.8170, 92.7870},   
+            {27.3389, 88.6065},   
 
             {23.8103, 90.4125},
             {24.5854, 73.7125},
@@ -154,9 +144,6 @@ public class TelemetryWebSocketServer extends WebSocketServer {
     };
 
 
-    // ============================================================
-    // CONSTRUCTOR
-    // ============================================================
 
     public TelemetryWebSocketServer(int port) {
 
@@ -169,10 +156,6 @@ public class TelemetryWebSocketServer extends WebSocketServer {
         initializeDrones();
     }
 
-
-    // ============================================================
-    // INITIALIZE 50 DRONES
-    // ============================================================
 
     private void initializeDrones() {
 
@@ -195,31 +178,17 @@ public class TelemetryWebSocketServer extends WebSocketServer {
                     INDIA_LOCATIONS[i][1];
 
 
-            /*
-             * Give every drone a slightly different
-             * starting altitude.
-             */
 
             double altitude =
                     100 + (i % 10) * 15;
 
 
-            /*
-             * Battery is deterministic.
-             *
-             * This means the same drone starts
-             * with the same battery.
-             */
 
             int battery =
                     95 - ((i * 7) % 30);
 
 
-            /*
-             * Keep a couple of drones in
-             * low battery state for testing.
-             */
-
+            
             if (i == 6) {
 
                 battery = 23;
@@ -289,9 +258,6 @@ public class TelemetryWebSocketServer extends WebSocketServer {
     }
 
 
-    // ============================================================
-    // WEBSOCKET START
-    // ============================================================
 
     @Override
     public void onStart() {
@@ -321,9 +287,6 @@ public class TelemetryWebSocketServer extends WebSocketServer {
         );
 
 
-        /*
-         * Start live telemetry loop.
-         */
 
         Thread telemetryThread =
                 new Thread(
@@ -342,9 +305,7 @@ public class TelemetryWebSocketServer extends WebSocketServer {
     }
 
 
-    // ============================================================
-    // LIVE TELEMETRY LOOP
-    // ============================================================
+  
 
     private void telemetryLoop() {
 
@@ -352,17 +313,11 @@ public class TelemetryWebSocketServer extends WebSocketServer {
 
             try {
 
-                /*
-                 * Update every drone.
-                 */
+               
 
                 updateDronePositions();
 
 
-                /*
-                 * Send the SAME current state
-                 * to every connected client.
-                 */
 
                 broadcastTelemetry();
 
@@ -392,18 +347,13 @@ public class TelemetryWebSocketServer extends WebSocketServer {
     }
 
 
-    // ============================================================
-    // UPDATE DRONE POSITIONS
-    // ============================================================
+   
 
     private synchronized void updateDronePositions() {
 
         for (Drone drone : drones) {
 
-            /*
-             * Small movement so the markers
-             * move smoothly on Cesium.
-             */
+            
 
             double latitudeMovement =
                     0.002 *
@@ -423,10 +373,6 @@ public class TelemetryWebSocketServer extends WebSocketServer {
                     longitudeMovement;
 
 
-            /*
-             * Keep drones inside a reasonable
-             * India map area.
-             */
 
             if (
                     drone.latitude > 35 ||
@@ -446,9 +392,6 @@ public class TelemetryWebSocketServer extends WebSocketServer {
             }
 
 
-            /*
-             * Small altitude variation.
-             */
 
             drone.altitude +=
                     drone.movementDirection * 2;
@@ -470,12 +413,6 @@ public class TelemetryWebSocketServer extends WebSocketServer {
             }
 
 
-            /*
-             * Slowly reduce battery.
-             *
-             * We only reduce it occasionally so
-             * the value doesn't drop too quickly.
-             */
 
             if (
                     RANDOM.nextInt(20) == 0 &&
@@ -485,10 +422,6 @@ public class TelemetryWebSocketServer extends WebSocketServer {
                 drone.battery--;
             }
 
-
-            /*
-             * Update status from battery.
-             */
 
             if (drone.battery <= 20) {
 
@@ -504,9 +437,7 @@ public class TelemetryWebSocketServer extends WebSocketServer {
     }
 
 
-    // ============================================================
-    // SEND TELEMETRY
-    // ============================================================
+    
 
     private synchronized void broadcastTelemetry() {
 
@@ -524,12 +455,6 @@ public class TelemetryWebSocketServer extends WebSocketServer {
                     );
 
 
-            /*
-             * IMPORTANT:
-             *
-             * Every connected frontend receives
-             * the exact same battery value.
-             */
 
             broadcast(json);
         }
@@ -543,10 +468,7 @@ public class TelemetryWebSocketServer extends WebSocketServer {
     }
 
 
-    // ============================================================
-    // CREATE JSON
-    // ============================================================
-
+   
     private String createTelemetryJson(
             Drone drone
     ) {
@@ -600,9 +522,7 @@ public class TelemetryWebSocketServer extends WebSocketServer {
     }
 
 
-    // ============================================================
-    // FORMAT DOUBLE
-    // ============================================================
+   
 
     private String formatDouble(
             double value
@@ -616,9 +536,6 @@ public class TelemetryWebSocketServer extends WebSocketServer {
     }
 
 
-    // ============================================================
-    // CLIENT CONNECTED
-    // ============================================================
 
     @Override
     public void onOpen(
@@ -632,10 +549,6 @@ public class TelemetryWebSocketServer extends WebSocketServer {
         );
 
 
-        /*
-         * Immediately send current telemetry
-         * to the newly connected frontend.
-         */
 
         synchronized (this) {
 
@@ -651,10 +564,7 @@ public class TelemetryWebSocketServer extends WebSocketServer {
     }
 
 
-    // ============================================================
-    // CLIENT DISCONNECTED
-    // ============================================================
-
+   
     @Override
     public void onClose(
             WebSocket conn,
@@ -670,9 +580,7 @@ public class TelemetryWebSocketServer extends WebSocketServer {
     }
 
 
-    // ============================================================
-    // MESSAGE RECEIVED
-    // ============================================================
+    
 
     @Override
     public void onMessage(
@@ -686,10 +594,6 @@ public class TelemetryWebSocketServer extends WebSocketServer {
         );
     }
 
-
-    // ============================================================
-    // ERROR
-    // ============================================================
 
     @Override
     public void onError(
