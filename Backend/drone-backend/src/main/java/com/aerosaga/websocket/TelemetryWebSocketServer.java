@@ -420,6 +420,8 @@ public class TelemetryWebSocketServer extends WebSocketServer {
             ) {
 
                 drone.battery--;
+                if (drone.battery <= 5) {
+        drone.battery = 100;}
             }
 
 

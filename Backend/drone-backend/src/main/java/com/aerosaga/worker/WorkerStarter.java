@@ -8,6 +8,8 @@ import io.temporal.client.WorkflowClient;
 import io.temporal.serviceclient.WorkflowServiceStubs;
 import io.temporal.worker.Worker;
 import io.temporal.worker.WorkerFactory;
+import com.aerosaga.activity.DropPackageActivityImpl;
+import com.aerosaga.activity.ReturnToBaseActivityImpl;
 
 public class WorkerStarter {
 
@@ -36,9 +38,10 @@ public class WorkerStarter {
 );
         
         worker.registerActivitiesImplementations(
-                new TakeoffActivityImpl()
+                new TakeoffActivityImpl(),
+                new DropPackageActivityImpl(),
+              new ReturnToBaseActivityImpl()
         );
-
         factory.start();
 
         System.out.println("🚁 AeroSaga Temporal Worker started!");
