@@ -21,7 +21,7 @@ public class ResilientDroneWorkflowStarter {
                         ResilientDroneWorkflowInterface.class,
                         WorkflowOptions.newBuilder()
                                 .setTaskQueue("DRONE_TASK_QUEUE")
-                                .setWorkflowId("resiliency-test-003")
+                                .setWorkflowId("resiliency-test-004")
                                 .build()
                 );
 
@@ -32,6 +32,6 @@ public class ResilientDroneWorkflowStarter {
         );
 
         System.out.println("Workflow started.");
-        System.out.println("Workflow ID: resiliency-test-003");
+        System.out.println("Workflow ID: resiliency-test-004");
     }
 }
