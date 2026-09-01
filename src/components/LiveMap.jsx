@@ -5,117 +5,103 @@ import "cesium/Build/Cesium/Widgets/widgets.css";
 Cesium.Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_TOKEN;
 
 export default function LiveMap({ selectedDroneId, drones }) {
-  const cesiumContainerRef = useRef(null);
+  const containerRef = useRef(null);
   const viewerRef = useRef(null);
-  const entityMapRef = useRef({}); // stores droneId -> Cesium entity
-  const initializedRef = useRef(false);
+  const entitiesRef = useRef({});
 
-  // Create the map ONCE
+  // Initialize viewer once
   useEffect(() => {
-    if (viewerRef.current) return;
-
-    const viewer = new Cesium.Viewer(cesiumContainerRef.current, {
+    const viewer = new Cesium.Viewer(containerRef.current, {
       timeline: false,
       animation: false,
       baseLayerPicker: false,
       geocoder: false,
-      homeButton: true,
       navigationHelpButton: false,
       sceneModePicker: false,
       fullscreenButton: false,
+      homeButton: false,
     });
 
     viewerRef.current = viewer;
 
     return () => {
-      if (viewerRef.current) {
-        viewerRef.current.destroy();
-        viewerRef.current = null;
-      }
+      viewer.destroy();
+      viewerRef.current = null;
+      entitiesRef.current = {};
     };
   }, []);
 
-  // Create or update entities whenever drone data changes
+  // Sync entities with drones prop
   useEffect(() => {
     const viewer = viewerRef.current;
-    console.log("LiveMap useEffect running. viewer:", !!viewer, "drones:", drones);
-    if (!viewer || !drones) return;
+    if (!viewer || !drones || drones.length === 0) return;
 
     drones.forEach((drone) => {
-      console.log("Adding drone:", drone.id, "lat:", drone.lat, "lng:", drone.lng);      const position = Cesium.Cartesian3.fromDegrees(
-        drone.lng,
-        drone.lat,
-        drone.altitude || 100
-      );
+      const lon = drone.lng;
+      const lat = drone.lat;
 
-      const existing = entityMapRef.current[drone.id];
+      if (typeof lon !== "number" || typeof lat !== "number") {
+        return;
+      }
 
-      if (existing) {
-        existing.position = position;
+      const cartesian = Cesium.Cartesian3.fromDegrees(lon, lat, drone.altitude || 100);
+
+      if (entitiesRef.current[drone.id]) {
+        entitiesRef.current[drone.id].position = cartesian;
       } else {
-
-        const entity = viewer.entities.add({
+        const isSelected = drone.id === selectedDroneId;
+        const newEntity = viewer.entities.add({
           id: drone.id,
-          name: drone.id,
-          position: position,
+          position: cartesian,
           point: {
-            pixelSize: 40,
-            color: Cesium.Color.RED,
+            pixelSize: isSelected ? 18 : 10,
+            color: isSelected
+              ? Cesium.Color.RED
+              : drone.status === "Active"
+              ? Cesium.Color.LIME
+              : Cesium.Color.ORANGE,
             outlineColor: Cesium.Color.WHITE,
-            outlineWidth: 4,
+            outlineWidth: 2,
             disableDepthTestDistance: Number.POSITIVE_INFINITY,
-            heightReference: Cesium.HeightReference.NONE,
           },
           label: {
             text: drone.id,
-            font: "bold 20px sans-serif",
-            fillColor: Cesium.Color.YELLOW,
-            pixelOffset: new Cesium.Cartesian2(0, -30),
+            font: "12px sans-serif",
+            fillColor: Cesium.Color.WHITE,
+            pixelOffset: new Cesium.Cartesian2(0, -20),
             disableDepthTestDistance: Number.POSITIVE_INFINITY,
           },
         });
-        entityMapRef.current[drone.id] = entity;
+        entitiesRef.current[drone.id] = newEntity;
       }
     });
 
-    if (!initializedRef.current && drones.length > 0) {
-      viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(73.86, 18.52, 15000),
-        duration: 1.5,
-      });
-      initializedRef.current = true;
-    }
+    // Fit camera to show all entities, once entities exist
+    viewer.zoomTo(viewer.entities);
   }, [drones]);
 
-  // React to search selection: highlight + zoom to that drone
+  // Update styling + fly camera on selection change
   useEffect(() => {
     const viewer = viewerRef.current;
     if (!viewer) return;
 
-    Object.values(entityMapRef.current).forEach((entity) => {
-      entity.point.pixelSize = 12;
-      entity.point.color = entity.point.color;
-      entity.point.outlineColor = Cesium.Color.WHITE;
-      entity.point.outlineWidth = 2;
+    Object.entries(entitiesRef.current).forEach(([id, entity]) => {
+      const isSelected = id === selectedDroneId;
+      entity.point.pixelSize = isSelected ? 18 : 10;
+      entity.point.color = isSelected ? Cesium.Color.RED : entity.point.color;
+      entity.point.outlineColor = isSelected ? Cesium.Color.YELLOW : Cesium.Color.WHITE;
+      entity.point.outlineWidth = isSelected ? 4 : 2;
     });
 
-    if (!selectedDroneId) {
-      viewer.zoomTo(viewer.entities);
-      return;
+    if (selectedDroneId && entitiesRef.current[selectedDroneId]) {
+      viewer.zoomTo(entitiesRef.current[selectedDroneId]);
     }
-
-    const targetEntity = entityMapRef.current[selectedDroneId];
-    if (!targetEntity) return;
-
-    targetEntity.point.pixelSize = 20;
-    targetEntity.point.outlineColor = Cesium.Color.YELLOW;
-    targetEntity.point.outlineWidth = 4;
-
-    viewer.flyTo(targetEntity, {
-      duration: 1.5,
-      offset: new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-45), 1500),
-    });
   }, [selectedDroneId]);
 
-  return <div ref={cesiumContainerRef} className="cesium-map-container" />;
+  return (
+    <div
+      ref={containerRef}
+      style={{ width: "100%", height: "100%", minHeight: "500px" }}
+    />
+  );
 }
