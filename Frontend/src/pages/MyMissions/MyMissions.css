@@ -5,30 +5,19 @@
   color: white;
   box-sizing: border-box;
 }
-
-/* =========================
-   BACK BUTTON
-========================= */
-
 .missions-back-button {
   width: 44px;
   height: 44px;
-
   border: 1px solid #1e2b40;
   border-radius: 10px;
-
   background: #0d1422;
   color: #20a8ff;
-
   font-size: 25px;
   cursor: pointer;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   margin-bottom: 18px;
-
   transition: 0.2s ease;
 }
 
@@ -37,9 +26,6 @@
   border-color: #20a8ff;
 }
 
-/* =========================
-   SEARCH
-========================= */
 
 .drone-search-wrapper {
   position: relative;
@@ -50,18 +36,13 @@
 .drone-search-container {
   width: 100%;
   height: 48px;
-
   display: flex;
   align-items: center;
-
   padding: 0 14px;
   box-sizing: border-box;
-
   background: #0e1523;
-
   border: 1px solid #1c2b41;
   border-radius: 10px;
-
   transition: 0.2s ease;
 }
 
@@ -78,14 +59,10 @@
 
 .drone-search-container input {
   width: 100%;
-
   border: none;
   outline: none;
-
   background: transparent;
-
   color: white;
-
   font-size: 14px;
 }
 
@@ -96,9 +73,7 @@
 .clear-search {
   border: none;
   background: transparent;
-
   color: #71809a;
-
   font-size: 20px;
   cursor: pointer;
 }
@@ -107,38 +82,26 @@
   color: white;
 }
 
-/* Search dropdown */
 
 .search-results {
   position: absolute;
-
   top: 55px;
   left: 0;
-
   width: 100%;
-
   background: #0d1421;
-
   border: 1px solid #1e2b40;
   border-radius: 10px;
-
   overflow: hidden;
-
   z-index: 1000;
-
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45);
 }
 
 .search-result-item {
   display: flex;
   align-items: center;
-
   gap: 12px;
-
   padding: 12px 14px;
-
   cursor: pointer;
-
   transition: 0.15s ease;
 }
 
@@ -149,11 +112,8 @@
 .result-dot {
   width: 9px;
   height: 9px;
-
   border-radius: 50%;
-
   background: #20d878;
-
   box-shadow: 0 0 8px rgba(32, 216, 120, 0.7);
 }
 
@@ -174,37 +134,24 @@
 
 .no-results {
   padding: 15px;
-
   color: #71809a;
   font-size: 13px;
 }
 
-/* =========================
-   MAIN LAYOUT
-========================= */
 
 .missions-content {
   display: grid;
-
-  grid-template-columns: minmax(0, 2fr) minmax(330px, 1fr);
-
+  grid-template-columns: minmax(0, 2fr) minmax(420px, 1fr);
   gap: 22px;
-
   align-items: start;
 }
 
-/* =========================
-   MAP CARD
-========================= */
 
 .live-map-card {
   background: #101724;
-
   border: 1px solid #1c2a3d;
   border-radius: 12px;
-
   padding: 26px;
-
   box-sizing: border-box;
 }
 
@@ -212,21 +159,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   margin-bottom: 18px;
 }
 
 .map-header h2 {
   margin: 0;
-
   font-size: 20px;
 }
 
 .map-header p {
   margin: 6px 0 0;
-
   color: #71809b;
-
   font-size: 14px;
 }
 
@@ -234,9 +177,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-
   color: #20d878;
-
   font-size: 12px;
   font-weight: 600;
 }
@@ -244,22 +185,16 @@
 .map-live-status span {
   width: 7px;
   height: 7px;
-
   border-radius: 50%;
-
   background: #20d878;
-
   box-shadow: 0 0 8px rgba(32, 216, 120, 0.7);
 }
 
 .cesium-map-container {
   width: 100%;
   height: 560px;
-
   overflow: hidden;
-
   border-radius: 9px;
-
   background: #18283a;
 }
 
@@ -268,112 +203,79 @@
   height: 100%;
 }
 
-/* =========================
-   SELECTED DRONE
-========================= */
+
 
 .selected-drone-card {
+  width: 100%;
   background: #101724;
-
   border: 1px solid #1c2a3d;
   border-radius: 14px;
-
   padding: 26px;
-
   box-sizing: border-box;
-
   min-height: 450px;
-
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
 }
 
-/* Top */
-
 .selected-drone-top {
   display: flex;
-
   justify-content: space-between;
-
   gap: 15px;
 }
 
 .selected-label {
   color: #71809b;
-
   font-size: 11px;
   font-weight: 600;
-
   letter-spacing: 1.2px;
-
   margin-bottom: 10px;
 }
 
 .selected-drone-title {
   display: flex;
-
   align-items: center;
-
   gap: 9px;
 }
 
 .selected-drone-title h2 {
   margin: 0;
-
   font-size: 25px;
 }
 
 .drone-status-dot {
   width: 10px;
   height: 10px;
-
   border-radius: 50%;
-
   background: #20d878;
-
   box-shadow: 0 0 10px rgba(32, 216, 120, 0.8);
 }
 
 .active-badge {
   padding: 5px 10px;
-
   border-radius: 20px;
-
   background: rgba(32, 216, 120, 0.14);
-
   border: 1px solid rgba(32, 216, 120, 0.3);
-
   color: #20d878;
-
   font-size: 11px;
   font-weight: 600;
 }
 
 .drone-name {
   margin: 7px 0 0;
-
   color: #71809b;
-
   font-size: 13px;
 }
 
-/* Live pill */
+
 
 .live-pill {
   height: fit-content;
-
   display: flex;
   align-items: center;
-
   gap: 6px;
-
   padding: 8px 12px;
-
   border: 1px solid rgba(32, 216, 120, 0.35);
-
   border-radius: 20px;
-
   color: #20d878;
-
   font-size: 11px;
   font-weight: 600;
 }
@@ -381,167 +283,284 @@
 .live-pill span {
   width: 6px;
   height: 6px;
-
   border-radius: 50%;
-
   background: #20d878;
-
   box-shadow: 0 0 7px rgba(32, 216, 120, 0.8);
 }
 
-/* Divider */
-
 .drone-divider {
   height: 1px;
-
   background: #1d2a3d;
-
   margin: 24px 0;
 }
 
-/* Details */
+
 
 .drone-details {
   display: grid;
-
   grid-template-columns: 1fr 1fr;
-
   gap: 28px 30px;
 }
 
 .detail-item {
   display: flex;
-
   flex-direction: column;
-
   gap: 7px;
 }
 
 .detail-item > span {
   color: #71809b;
-
   font-size: 12px;
 }
 
 .detail-item strong {
   color: #f2f6fb;
-
   font-size: 17px;
 }
 
-/* Battery */
+
 
 .battery-bar {
   width: 100%;
   height: 5px;
-
   background: #1b2738;
-
   border-radius: 10px;
-
   overflow: hidden;
-
   margin-top: 2px;
 }
 
 .battery-bar div {
   height: 100%;
-
   background: #20d878;
-
   border-radius: 10px;
 }
 
-/* Signal */
 
 .signal-value {
   display: flex;
-
   align-items: center;
-
   gap: 7px;
 }
 
 .signal-value span {
   width: 7px;
   height: 7px;
-
   border-radius: 50%;
-
   background: #20d878;
 }
 
-/* Location */
+
 
 .location-box {
   margin-top: 30px;
-
   padding: 15px;
-
   background: #0b111d;
-
   border: 1px solid #1b293d;
-
   border-radius: 9px;
-
   display: flex;
-
   flex-direction: column;
-
   gap: 8px;
 }
 
 .location-box span {
   color: #71809b;
-
   font-size: 11px;
-
   text-transform: uppercase;
-
   letter-spacing: 0.8px;
 }
 
 .location-box strong {
   color: #dce7f4;
-
   font-size: 13px;
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
 
-@media (max-width: 1000px) {
-  .missions-content {
-    grid-template-columns: 1fr;
-  }
-
-  .cesium-map-container {
-    height: 480px;
-  }
+.mission-workflow-card {
+  width: 100%;
+  margin-top: 22px;
+  background: #101724;
+  border: 1px solid #1c2a3d;
+  border-radius: 14px;
+  padding: 26px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-@media (max-width: 600px) {
-  .my-missions-page {
-    padding: 18px;
-  }
 
-  .drone-search-wrapper {
-    width: 100%;
-  }
 
-  .drone-details {
-    grid-template-columns: 1fr;
-  }
+.workflow-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
 }
-/* Blinking LIVE indicator */
-.map-live-status span,
-.live-pill span {
+
+.workflow-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #f2f6fb;
+}
+
+.workflow-header p {
+  margin: 6px 0 0;
+  color: #71809b;
+  font-size: 14px;
+}
+
+
+
+.workflow-live {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #20d878;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.workflow-live span {
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: #20d878;
+  box-shadow: 0 0 8px rgba(32, 216, 120, 0.8);
+  animation: liveBlink 1s infinite;
+}
 
+
+.workflow-steps {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0;
+  overflow-x: auto;
+  padding: 4px 0 10px;
+  box-sizing: border-box;
+}
+
+
+
+.workflow-step {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 150px;
+  height: 62px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+  padding: 10px 14px;
+
+  border: 1px solid #1c2a3d;
+  border-radius: 10px;
+
+  background: #0d1421;
+
+  box-sizing: border-box;
+}
+
+
+
+.step-circle {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  background: #182337;
+  color: #71809b;
+
+  border: 1px solid #2a3950;
+}
+
+
+
+.step-content {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.step-content strong {
+  color: #e7edf5;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.step-content span {
+  color: #71809b;
+  font-size: 11px;
+}
+
+
+
+.workflow-step.completed {
+  border-color: rgba(32, 216, 120, 0.4);
+}
+
+.workflow-step.completed .step-circle {
+  background: rgba(32, 216, 120, 0.15);
+  border-color: #20d878;
+  color: #20d878;
+}
+
+.workflow-step.completed .step-content span {
+  color: #20d878;
+}
+
+
+.workflow-step.active {
+  border-color: rgba(32, 168, 255, 0.6);
+  box-shadow: 0 0 18px rgba(32, 168, 255, 0.08);
+}
+
+.workflow-step.active .step-circle {
+  background: rgba(32, 168, 255, 0.15);
+  border-color: #20a8ff;
+  color: #20a8ff;
+  box-shadow: 0 0 10px rgba(32, 168, 255, 0.25);
+}
+
+.workflow-step.active .step-content span {
+  color: #20a8ff;
+}
+
+
+.workflow-step.pending {
+  opacity: 0.65;
+}
+.workflow-arrow {
+  flex: 0 0 35px;
+
+  width: 35px;
+  min-width: 35px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #53657d;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+
+
+.map-live-status span,
+.live-pill span {
   animation: liveBlink 1s infinite;
 }
 
@@ -559,5 +578,101 @@
   100% {
     opacity: 1;
     box-shadow: 0 0 8px rgba(32, 216, 120, 0.9);
+  }
+}
+
+
+
+@media (max-width: 1200px) {
+  .missions-content {
+    grid-template-columns: minmax(0, 1.7fr) minmax(380px, 1fr);
+  }
+
+  .workflow-step {
+    min-width: 145px;
+  }
+
+  .step-content strong {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .missions-content {
+    grid-template-columns: 1fr;
+  }
+
+  .cesium-map-container {
+    height: 480px;
+  }
+
+  .selected-drone-card {
+    min-height: auto;
+  }
+
+  .mission-workflow-card {
+    width: 100%;
+  }
+
+  .workflow-step {
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 700px) {
+  .workflow-steps {
+    justify-content: flex-start;
+  }
+
+  .workflow-step {
+    flex: 0 0 150px;
+    min-width: 150px;
+  }
+
+  .workflow-arrow {
+    flex: 0 0 30px;
+    width: 30px;
+    min-width: 30px;
+  }
+}
+
+@media (max-width: 600px) {
+  .my-missions-page {
+    padding: 18px;
+  }
+
+  .drone-search-wrapper {
+    width: 100%;
+  }
+
+  .drone-details {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-workflow-card {
+    padding: 20px;
+  }
+
+  .workflow-header {
+    margin-bottom: 20px;
+  }
+
+  .workflow-header h2 {
+    font-size: 18px;
+  }
+
+  .workflow-header p {
+    font-size: 13px;
+  }
+
+  .workflow-step {
+    min-width: 145px;
+    flex-basis: 145px;
+  }
+
+  .workflow-arrow {
+    width: 25px;
+    min-width: 25px;
+    flex-basis: 25px;
   }
 }
