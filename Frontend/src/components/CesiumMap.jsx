@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
-function CesiumMap() {
+function CesiumMap({ onTelemetry }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ function CesiumMap() {
       }
 
       Cesium.Ion.defaultAccessToken =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5YTYzNTZmZS1lYzg4LTRhYWYtODgxOS0yOGRlYmFlMDc1MTEiLCJpZCI6NDY0NTg1LCJzdWIiOiJIaW1hbnNodSBTYWhhIiwiaXNzIjoiaHR0cHM6Ly9hcGkuY2VzaXVtLmNvbSIsImF1ZCI6IkhpbWFuc2h1IFNhaGFfZGVmYXVsdCIsImlhdCI6MTc4NjM5NTYyMn0.WAGHm35KL9RYeQhjHP9LLaqB22Ljj-Y4NkYMPy_F-Ak";
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5YTYzNTZmZS1lYzg4LTRhYWYtODgxOS0yOGRlYmFlMDc1MTEiLCJpZCI6NDY0NTg1LCJzdWIiOiJaaW1hbnNodSBTYWhhIiwiaXNzIjoiaHR0cHM6Ly9hcGkuY2VzaXVtLmNvbSIsImF1ZCI6IkhpbWFuc2h1IFNhaGFfZGVmYXVsdCIsImlhdCI6MTc4NjM5NTYyMn0.WAGHm35KL9RYeQhjHP9LLaqB22Ljj-Y4NkYMPy_F-Ak";
 
       try {
         const imageryProvider =
@@ -98,6 +98,21 @@ function CesiumMap() {
               return;
             }
 
+            /*
+             * Send the SAME telemetry data to MyMissions.
+             * This means Selected Drone uses live data from WebSocket.
+             */
+            if (onTelemetry) {
+              onTelemetry({
+                ...telemetry,
+                droneId,
+                latitude,
+                longitude,
+                altitude,
+                battery,
+              });
+            }
+
             let droneEntity = droneEntities.get(droneId);
 
             if (!droneEntity) {
@@ -117,7 +132,12 @@ function CesiumMap() {
                 point: {
                   pixelSize: 10,
 
-                  color: Cesium.Color.LIME,
+                  color:
+                    battery <= 20
+                      ? Cesium.Color.RED
+                      : battery <= 50
+                      ? Cesium.Color.YELLOW
+                      : Cesium.Color.LIME,
 
                   outlineColor: Cesium.Color.WHITE,
 
@@ -135,8 +155,7 @@ function CesiumMap() {
 
                   outlineWidth: 2,
 
-                  style:
-                    Cesium.LabelStyle.FILL_AND_OUTLINE,
+                  style: Cesium.LabelStyle.FILL_AND_OUTLINE,
 
                   verticalOrigin:
                     Cesium.VerticalOrigin.BOTTOM,
@@ -150,36 +169,7 @@ function CesiumMap() {
                     Number.POSITIVE_INFINITY,
                 },
 
-                description: `
-                  <div style="font-family: Arial;">
-                    <h3>Drone ${droneId}</h3>
-
-                    <p>
-                      <strong>Status:</strong>
-                      ${telemetry.status}
-                    </p>
-
-                    <p>
-                      <strong>Altitude:</strong>
-                      ${altitude} m
-                    </p>
-
-                    <p>
-                      <strong>Latitude:</strong>
-                      ${latitude}
-                    </p>
-
-                    <p>
-                      <strong>Longitude:</strong>
-                      ${longitude}
-                    </p>
-
-                    <p>
-                      <strong>Battery:</strong>
-                      ${battery}%
-                    </p>
-                  </div>
-                `,
+                description: "",
               });
 
               droneEntities.set(
@@ -193,6 +183,9 @@ function CesiumMap() {
               );
             }
 
+            /*
+             * Update position
+             */
             droneEntity.position =
               Cesium.Cartesian3.fromDegrees(
                 longitude,
@@ -200,16 +193,46 @@ function CesiumMap() {
                 altitude
               );
 
+            /*
+             * Update label
+             */
             droneEntity.label.text =
               `${droneId} | ${battery}%`;
 
+            /*
+             * Update drone color according to battery
+             */
+            if (battery <= 20) {
+              droneEntity.point.color =
+                Cesium.Color.RED;
+            } else if (battery <= 50) {
+              droneEntity.point.color =
+                Cesium.Color.YELLOW;
+            } else {
+              droneEntity.point.color =
+                Cesium.Color.LIME;
+            }
+
+            /*
+             * Update Cesium information box
+             */
             droneEntity.description = `
-              <div style="font-family: Arial;">
+              <div style="font-family: Arial; padding: 8px;">
                 <h3>Drone ${droneId}</h3>
 
                 <p>
                   <strong>Status:</strong>
-                  ${telemetry.status}
+                  ${telemetry.status ?? "Unknown"}
+                </p>
+
+                <p>
+                  <strong>Battery:</strong>
+                  ${battery}%
+                </p>
+
+                <p>
+                  <strong>Speed:</strong>
+                  ${telemetry.speed ?? "N/A"} km/h
                 </p>
 
                 <p>
@@ -228,22 +251,11 @@ function CesiumMap() {
                 </p>
 
                 <p>
-                  <strong>Battery:</strong>
-                  ${battery}%
+                  <strong>Signal:</strong>
+                  ${telemetry.signal ?? "N/A"}
                 </p>
               </div>
             `;
-
-            if (battery <= 20) {
-              droneEntity.point.color =
-                Cesium.Color.RED;
-            } else if (battery <= 50) {
-              droneEntity.point.color =
-                Cesium.Color.YELLOW;
-            } else {
-              droneEntity.point.color =
-                Cesium.Color.LIME;
-            }
           } catch (error) {
             console.error(
               "Telemetry parsing error:",
@@ -287,7 +299,7 @@ function CesiumMap() {
 
       droneEntities.clear();
     };
-  }, []);
+  }, [onTelemetry]);
 
   return (
     <div
