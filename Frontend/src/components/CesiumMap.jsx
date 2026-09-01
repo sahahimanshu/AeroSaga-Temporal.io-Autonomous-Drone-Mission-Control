@@ -98,19 +98,26 @@ function CesiumMap({ onTelemetry }) {
               return;
             }
 
-            /*
-             * Send the SAME telemetry data to MyMissions.
-             * This means Selected Drone uses live data from WebSocket.
-             */
-            if (onTelemetry) {
-              onTelemetry({
-                ...telemetry,
-                droneId,
-                latitude,
-                longitude,
-                altitude,
-                battery,
-              });
+           
+           const liveTelemetry = {
+  ...telemetry,
+  droneId,
+  latitude,
+  longitude,
+  altitude,
+  battery,
+};
+
+window.dispatchEvent(
+  new CustomEvent("drone-telemetry", {
+    detail: liveTelemetry,
+  })
+);
+
+
+if (onTelemetry) {
+  onTelemetry(liveTelemetry);
+
             }
 
             let droneEntity = droneEntities.get(droneId);
@@ -183,9 +190,6 @@ function CesiumMap({ onTelemetry }) {
               );
             }
 
-            /*
-             * Update position
-             */
             droneEntity.position =
               Cesium.Cartesian3.fromDegrees(
                 longitude,
@@ -193,15 +197,10 @@ function CesiumMap({ onTelemetry }) {
                 altitude
               );
 
-            /*
-             * Update label
-             */
             droneEntity.label.text =
               `${droneId} | ${battery}%`;
 
-            /*
-             * Update drone color according to battery
-             */
+            
             if (battery <= 20) {
               droneEntity.point.color =
                 Cesium.Color.RED;
@@ -213,9 +212,6 @@ function CesiumMap({ onTelemetry }) {
                 Cesium.Color.LIME;
             }
 
-            /*
-             * Update Cesium information box
-             */
             droneEntity.description = `
               <div style="font-family: Arial; padding: 8px;">
                 <h3>Drone ${droneId}</h3>
