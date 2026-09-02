@@ -17,13 +17,14 @@ public class MissionSagaWorkflowImpl implements MissionSagaWorkflow {
             Workflow.newActivityStub(
                     TakeoffActivity.class,
                     ActivityOptions.newBuilder()
-                            .setStartToCloseTimeout(Duration.ofMinutes(1))
+                            .setStartToCloseTimeout(Duration.ofMinutes(2))
                             .build()
             );
 
     @Override
     public String executeMission(List<String> droneIds) {
 
+        // STEP 1: TAKEOFF
         missionState = "TAKEOFF";
 
         List<Promise<String>> takeoffPromises = droneIds.stream()
@@ -34,10 +35,24 @@ public class MissionSagaWorkflowImpl implements MissionSagaWorkflow {
                 )
                 .toList();
 
-        missionState = "ACTIVE";
-
         Promise.allOf(takeoffPromises).get();
 
+        // STEP 2: LONG RUNNING MISSION
+        missionState = "NAVIGATING";
+
+        Workflow.sleep(Duration.ofMinutes(3));
+
+        // STEP 3: DROP PACKAGE
+        missionState = "DROPPING";
+
+        Workflow.sleep(Duration.ofMinutes(2));
+
+        // STEP 4: RETURN TO BASE
+        missionState = "RETURNING";
+
+        Workflow.sleep(Duration.ofMinutes(2));
+
+        // COMPLETED
         missionState = "COMPLETED";
 
         return "Mission completed successfully for "
