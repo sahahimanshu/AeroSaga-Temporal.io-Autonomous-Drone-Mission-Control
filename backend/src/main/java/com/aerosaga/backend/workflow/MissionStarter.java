@@ -76,10 +76,9 @@ public class MissionStarter {
                 MissionWorkflowImpl.class
         );
 
-        worker.registerActivitiesImplementations(
-                new MissionActivitiesImpl()
-        );
-
+        MissionActivitiesImpl activitiesImpl = new MissionActivitiesImpl();
+        activitiesImpl.setSimulateFailures(true); // enable random failures to demo compensation logic
+        worker.registerActivitiesImplementations(activitiesImpl);
         // 3. Start worker
         factory.start();
 

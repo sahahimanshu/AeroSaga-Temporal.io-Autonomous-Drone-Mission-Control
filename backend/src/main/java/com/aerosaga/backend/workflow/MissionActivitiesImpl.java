@@ -2,6 +2,12 @@ package com.aerosaga.backend.workflow;
 
 public class MissionActivitiesImpl implements MissionActivities {
 
+    private boolean simulateFailures = false;
+
+    public void setSimulateFailures(boolean simulateFailures) {
+        this.simulateFailures = simulateFailures;
+    }
+
     @Override
     public String takeoff(String droneId) {
         System.out.println("Drone " + droneId + " is taking off...");
@@ -22,6 +28,12 @@ public class MissionActivitiesImpl implements MissionActivities {
     public String dropPackage(String droneId) {
         System.out.println("Drone " + droneId + " dropping package...");
         simulateDelay();
+
+        if (simulateFailures && Math.random() < 0.3) {
+            System.out.println("Drone " + droneId + " FAILED to drop package!");
+            throw new RuntimeException("Package drop failed for drone " + droneId);
+        }
+
         System.out.println("Drone " + droneId + " package dropped.");
         return "Package dropped by " + droneId;
     }
