@@ -7,21 +7,13 @@ function Dashboard() {
   // CURRENT DATE AND TIME
   // ============================================================
 
-  const [currentDateTime, setCurrentDateTime] =
-    useState(new Date());
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
   // ============================================================
-  // LIVE TELEMETRY
+  // LIVE FLEET TELEMETRY
   // ============================================================
 
-  const [telemetry, setTelemetry] = useState({
-    droneId: "M-102",
-    latitude: 22.5726,
-    longitude: 88.3639,
-    altitude: 120,
-    battery: 100,
-    status: "Connecting",
-  });
+  const [drones, setDrones] = useState({});
 
   const [lastUpdate, setLastUpdate] = useState(null);
 
@@ -42,60 +34,56 @@ function Dashboard() {
   // ============================================================
 
   useEffect(() => {
-    const socket = new WebSocket(
-      "ws://localhost:8081"
-    );
+    const socket = new WebSocket("ws://localhost:8090");
 
     socket.onopen = () => {
-      console.log(
-        "Dashboard telemetry WebSocket connected."
-      );
-
-      setTelemetry((previous) => ({
-        ...previous,
-        status: "Online",
-      }));
+      console.log("Dashboard telemetry WebSocket connected.");
     };
 
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
 
-        console.log(
-          "Dashboard telemetry:",
-          data
-        );
+        console.log("Dashboard telemetry:", data);
 
-        setTelemetry((previous) => ({
+        if (
+          !data.droneId ||
+          typeof data.latitude !== "number" ||
+          typeof data.longitude !== "number"
+        ) {
+          console.warn("Invalid dashboard telemetry:", data);
+          return;
+        }
+
+        const droneId = data.droneId;
+
+        const droneData = {
+          droneId,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          altitude: Number(data.altitude) || 0,
+          battery: Number(data.battery) || 0,
+          status: data.status || "Unknown",
+          lastUpdate: new Date(),
+        };
+
+        setDrones((previous) => ({
           ...previous,
-          ...data,
+          [droneId]: droneData,
         }));
 
         setLastUpdate(new Date());
       } catch (error) {
-        console.error(
-          "Invalid dashboard telemetry:",
-          error
-        );
+        console.error("Invalid dashboard telemetry:", error);
       }
     };
 
     socket.onerror = (error) => {
-      console.error(
-        "Dashboard WebSocket error:",
-        error
-      );
+      console.error("Dashboard WebSocket error:", error);
     };
 
     socket.onclose = () => {
-      console.log(
-        "Dashboard telemetry WebSocket disconnected."
-      );
-
-      setTelemetry((previous) => ({
-        ...previous,
-        status: "Offline",
-      }));
+      console.log("Dashboard telemetry WebSocket disconnected.");
     };
 
     return () => {
@@ -107,52 +95,64 @@ function Dashboard() {
   // DATE / TIME FORMAT
   // ============================================================
 
-  const date =
-    currentDateTime.toLocaleDateString(
-      "en-IN",
-      {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }
-    );
+  const date = currentDateTime.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 
-  const time =
-    currentDateTime.toLocaleTimeString(
-      "en-IN",
-      {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true,
-      }
-    );
+  const time = currentDateTime.toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
 
   // ============================================================
-  // LIVE DRONE STATUS
+  // FLEET DATA
   // ============================================================
 
-  const isOnline =
-    telemetry.status?.toLowerCase() ===
-      "online" ||
-    telemetry.status?.toLowerCase() ===
-      "active";
+  const droneList = Object.values(drones).sort((a, b) =>
+    a.droneId.localeCompare(b.droneId, undefined, {
+      numeric: true,
+    })
+  );
 
-  const activeDrones = isOnline ? 1 : 0;
+  const totalDrones = droneList.length;
 
-  const offlineDrones = isOnline ? 0 : 1;
+  const activeDrones = droneList.filter((drone) => {
+    const status = drone.status?.toLowerCase();
+
+    return status === "online" || status === "active";
+  }).length;
+
+  const offlineDrones = droneList.filter((drone) => {
+    const status = drone.status?.toLowerCase();
+
+    return status === "offline";
+  }).length;
+
+  const averageBattery =
+    totalDrones > 0
+      ? Math.round(
+          droneList.reduce(
+            (total, drone) => total + drone.battery,
+            0
+          ) / totalDrones
+        )
+      : 0;
 
   // ============================================================
   // LAST UPDATE
   // ============================================================
 
-  const getLastUpdateText = () => {
-    if (!lastUpdate) {
-      return "Waiting for telemetry";
+  const getLastUpdateText = (drone) => {
+    if (!drone?.lastUpdate) {
+      return "Waiting";
     }
 
     const seconds = Math.floor(
-      (new Date() - lastUpdate) / 1000
+      (new Date() - drone.lastUpdate) / 1000
     );
 
     if (seconds <= 1) {
@@ -161,6 +161,18 @@ function Dashboard() {
 
     return `${seconds} sec ago`;
   };
+
+  // ============================================================
+  // LOW BATTERY DRONES
+  // ============================================================
+
+  const lowBatteryDrones = droneList.filter(
+    (drone) => drone.battery <= 20
+  );
+
+  // ============================================================
+  // RETURN
+  // ============================================================
 
   return (
     <div className="dashboard">
@@ -204,7 +216,7 @@ function Dashboard() {
 
             <p>Total Drones</p>
 
-            <h2>1</h2>
+            <h2>{totalDrones}</h2>
 
             <span>
               Connected telemetry drones
@@ -230,13 +242,11 @@ function Dashboard() {
 
             <p>Active Drones</p>
 
-            <h2>
-              {activeDrones}
-            </h2>
+            <h2>{activeDrones}</h2>
 
             <span>
-              {isOnline
-                ? "Drone online"
+              {activeDrones > 0
+                ? `${activeDrones} drones online`
                 : "No active drone"}
             </span>
 
@@ -260,12 +270,12 @@ function Dashboard() {
 
             <p>Offline Drones</p>
 
-            <h2>
-              {offlineDrones}
-            </h2>
+            <h2>{offlineDrones}</h2>
 
             <span>
-              Current connection status
+              {offlineDrones > 0
+                ? `${offlineDrones} drones offline`
+                : "All drones connected"}
             </span>
 
           </div>
@@ -306,9 +316,7 @@ function Dashboard() {
 
             <p>Avg. Battery</p>
 
-            <h2>
-              {telemetry.battery}%
-            </h2>
+            <h2>{averageBattery}%</h2>
 
             <span>
               Live fleet battery
@@ -516,44 +524,86 @@ function Dashboard() {
 
               <tbody>
 
-                <tr>
+                {droneList.length === 0 ? (
 
-                  <td>
-                    {telemetry.droneId}
-                  </td>
+                  <tr>
 
-                  <td>
+                    <td colSpan="5">
+                      Waiting for telemetry...
+                    </td>
 
-                    <span
-                      className={
-                        isOnline
-                          ? "table-status active"
-                          : "table-status offline"
-                      }
-                    >
+                  </tr>
 
-                      ●{" "}
-                      {telemetry.status}
+                ) : (
 
-                    </span>
+                  droneList.map((drone) => {
 
-                  </td>
+                    const isOnline =
+                      drone.status?.toLowerCase() ===
+                        "online" ||
+                      drone.status?.toLowerCase() ===
+                        "active";
 
-                  <td>
-                    {telemetry.battery}%
-                  </td>
+                    return (
 
-                  <td>
-                    {telemetry.latitude.toFixed(4)},
-                    {" "}
-                    {telemetry.longitude.toFixed(4)}
-                  </td>
+                      <tr key={drone.droneId}>
 
-                  <td>
-                    {getLastUpdateText()}
-                  </td>
+                        <td>
+                          <strong>
+                            {drone.droneId}
+                          </strong>
+                        </td>
 
-                </tr>
+                        <td>
+
+                          <span
+                            className={
+                              isOnline
+                                ? "table-status active"
+                                : "table-status offline"
+                            }
+                          >
+
+                            ●{" "}
+                            {drone.status}
+
+                          </span>
+
+                        </td>
+
+                        <td>
+
+                          <span
+                            style={{
+                              color:
+                                drone.battery <= 20
+                                  ? "#ff4444"
+                                  : "inherit",
+                            }}
+                          >
+                            {drone.battery}%
+                          </span>
+
+                        </td>
+
+                        <td>
+
+                          {drone.latitude.toFixed(4)},
+                          {" "}
+                          {drone.longitude.toFixed(4)}
+
+                        </td>
+
+                        <td>
+                          {getLastUpdateText(drone)}
+                        </td>
+
+                      </tr>
+
+                    );
+                  })
+
+                )}
 
               </tbody>
 
@@ -589,11 +639,14 @@ function Dashboard() {
 
           <div className="alerts-list">
 
-            {/* LOW BATTERY ALERT */}
+            {/* LOW BATTERY ALERTS */}
 
-            {telemetry.battery <= 20 && (
+            {lowBatteryDrones.map((drone) => (
 
-              <div className="alert-item danger">
+              <div
+                className="alert-item danger"
+                key={`battery-${drone.droneId}`}
+              >
 
                 <div className="alert-icon">
                   ⚠
@@ -602,60 +655,69 @@ function Dashboard() {
                 <div>
 
                   <strong>
-                    Low Battery:{" "}
-                    {telemetry.droneId}
+                    Low Battery: {drone.droneId}
                   </strong>
 
                   <span>
                     Battery level critical:{" "}
-                    {telemetry.battery}%
+                    {drone.battery}%
                   </span>
 
                   <small>
-                    {getLastUpdateText()}
+                    {getLastUpdateText(drone)}
                   </small>
 
                 </div>
 
               </div>
 
-            )}
+            ))}
 
-            {/* CONNECTION ALERT */}
+            {/* OFFLINE DRONE ALERTS */}
 
-            {!isOnline && (
+            {droneList
+              .filter(
+                (drone) =>
+                  drone.status?.toLowerCase() ===
+                  "offline"
+              )
+              .map((drone) => (
 
-              <div className="alert-item danger">
+                <div
+                  className="alert-item danger"
+                  key={`offline-${drone.droneId}`}
+                >
 
-                <div className="alert-icon">
-                  ⚠
+                  <div className="alert-icon">
+                    ⚠
+                  </div>
+
+                  <div>
+
+                    <strong>
+                      Drone Offline
+                    </strong>
+
+                    <span>
+                      {drone.droneId} is currently
+                      offline.
+                    </span>
+
+                    <small>
+                      Waiting for connection
+                    </small>
+
+                  </div>
+
                 </div>
 
-                <div>
-
-                  <strong>
-                    Drone Offline
-                  </strong>
-
-                  <span>
-                    {telemetry.droneId} is
-                    currently offline.
-                  </span>
-
-                  <small>
-                    Waiting for connection
-                  </small>
-
-                </div>
-
-              </div>
-
-            )}
+              ))}
 
             {/* NORMAL TELEMETRY */}
 
-            {isOnline &&
-              telemetry.battery > 20 && (
+            {droneList.length > 0 &&
+              lowBatteryDrones.length === 0 &&
+              offlineDrones === 0 && (
 
                 <div className="alert-item info">
 
@@ -670,12 +732,14 @@ function Dashboard() {
                     </strong>
 
                     <span>
-                      {telemetry.droneId} is
+                      {totalDrones} drones are
                       sending live telemetry.
                     </span>
 
                     <small>
-                      {getLastUpdateText()}
+                      {lastUpdate
+                        ? "Live"
+                        : "Waiting"}
                     </small>
 
                   </div>

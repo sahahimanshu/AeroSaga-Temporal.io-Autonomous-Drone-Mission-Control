@@ -1,5 +1,6 @@
 com\aerosaga\workflow\DroneTakeoffWorkflowImpl.class
 com\aerosaga\workflow\MissionSagaWorkflowImpl.class
+com\aerosaga\websocket\TelemetryWebSocketServer$DroneState.class
 com\aerosaga\activity\TakeoffActivityImpl.class
 com\aerosaga\workflow\DroneTakeoffWorkflow.class
 com\aerosaga\activity\TakeoffActivity.class
