@@ -7,7 +7,7 @@ import io.temporal.activity.ActivityOptions;
 import io.temporal.workflow.Async;
 import io.temporal.workflow.Promise;
 import io.temporal.workflow.Workflow;
-
+import io.temporal.common.RetryOptions;
 import java.time.Duration;
 import java.util.List;
 
@@ -24,8 +24,15 @@ public class MissionSagaWorkflowImpl implements MissionSagaWorkflow {
             );
 
 private final DropPackageActivity dropPackageActivity = Workflow.newActivityStub(
-  DropPackageActivity.class,
-  ActivityOptions.newBuilder().setStartToCloseTimeout(Duration.ofMinutes(1)).build()
+        DropPackageActivity.class,
+        ActivityOptions.newBuilder()
+                .setStartToCloseTimeout(Duration.ofMinutes(1))
+                .setRetryOptions(
+                        RetryOptions.newBuilder()
+                                .setMaximumAttempts(1)
+                                .build()
+                )
+                .build()
 );
 
 private final ReturnToBaseActivity returnToBaseActivity =Workflow.newActivityStub(ReturnToBaseActivity.class,ActivityOptions.newBuilder().setStartToCloseTimeout(Duration.ofMinutes(1)).build()
