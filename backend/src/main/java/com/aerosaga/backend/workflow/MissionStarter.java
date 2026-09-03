@@ -79,6 +79,7 @@ public class MissionStarter {
         MissionActivitiesImpl activitiesImpl = new MissionActivitiesImpl();
         activitiesImpl.setSimulateFailures(true); // enable random failures to demo compensation logic
         worker.registerActivitiesImplementations(activitiesImpl);
+        
         // 3. Start worker
         factory.start();
 
@@ -93,7 +94,7 @@ public class MissionStarter {
                         MissionWorkflow.class,
                         WorkflowOptions.newBuilder()
                                 .setTaskQueue(TASK_QUEUE)
-                                .setWorkflowId("mission-DR-001")
+                                .setWorkflowId("mission-DR-001-" + System.currentTimeMillis())
                                 .build()
                 );
 
