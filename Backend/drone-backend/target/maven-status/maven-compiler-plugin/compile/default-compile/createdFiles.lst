@@ -2,6 +2,7 @@ com\aerosaga\activity\ReturnToBaseActivity.class
 com\aerosaga\workflow\ResilientDroneWorkflow.class
 com\aerosaga\activity\DropPackageActivityImpl.class
 com\aerosaga\activity\ReturnToBaseActivityImpl.class
+com\aerosaga\MissionStateApiStarter.class
 com\aerosaga\activity\TakeoffActivityImpl.class
 com\aerosaga\workflow\DroneTakeoffWorkflow.class
 com\aerosaga\activity\TakeoffActivity.class

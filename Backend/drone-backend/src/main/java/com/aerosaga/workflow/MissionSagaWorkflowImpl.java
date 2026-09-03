@@ -3,15 +3,18 @@ package com.aerosaga.workflow;
 import com.aerosaga.activity.DropPackageActivity;
 import com.aerosaga.activity.ReturnToBaseActivity;
 import com.aerosaga.activity.TakeoffActivity;
+
 import io.temporal.activity.ActivityOptions;
+import io.temporal.common.RetryOptions;
 import io.temporal.workflow.Async;
 import io.temporal.workflow.Promise;
 import io.temporal.workflow.Workflow;
-import io.temporal.common.RetryOptions;
+
 import java.time.Duration;
 import java.util.List;
 
 public class MissionSagaWorkflowImpl implements MissionSagaWorkflow {
+
 
     private String missionState = "CREATED";
 
@@ -23,27 +26,37 @@ public class MissionSagaWorkflowImpl implements MissionSagaWorkflow {
                             .build()
             );
 
-private final DropPackageActivity dropPackageActivity = Workflow.newActivityStub(
-        DropPackageActivity.class,
-        ActivityOptions.newBuilder()
-                .setStartToCloseTimeout(Duration.ofMinutes(1))
-                .setRetryOptions(
-                        RetryOptions.newBuilder()
-                                .setMaximumAttempts(1)
-                                .build()
-                )
-                .build()
-);
 
-private final ReturnToBaseActivity returnToBaseActivity =Workflow.newActivityStub(ReturnToBaseActivity.class,ActivityOptions.newBuilder().setStartToCloseTimeout(Duration.ofMinutes(1)).build()
-        
- 
-);
+    private final DropPackageActivity dropPackageActivity =
+            Workflow.newActivityStub(
+                    DropPackageActivity.class,
+                    ActivityOptions.newBuilder()
+                            .setStartToCloseTimeout(Duration.ofMinutes(1))
+                            .setRetryOptions(
+                                    RetryOptions.newBuilder()
+                                            .setMaximumAttempts(1)
+                                            .build()
+                            )
+                            .build()
+            );
 
+  
+    private final ReturnToBaseActivity returnToBaseActivity =
+            Workflow.newActivityStub(
+                    ReturnToBaseActivity.class,
+                    ActivityOptions.newBuilder()
+                            .setStartToCloseTimeout(Duration.ofMinutes(1))
+                            .build()
+            );
+
+  
     @Override
     public String executeMission(List<String> droneIds) {
 
+        
         missionState = "TAKEOFF";
+
+        System.out.println("🚁 Mission State: TAKEOFF");
 
         List<Promise<String>> takeoffPromises = droneIds.stream()
                 .map(droneId ->
@@ -55,15 +68,33 @@ private final ReturnToBaseActivity returnToBaseActivity =Workflow.newActivityStu
 
         Promise.allOf(takeoffPromises).get();
 
+        
+        Workflow.sleep(Duration.ofSeconds(60));
+
         missionState = "ACTIVE";
+
+        System.out.println("🛰️ Mission State: ACTIVE");
+
+        // Keep ACTIVE visible for 5 seconds
+        Workflow.sleep(Duration.ofSeconds(5));
 
         try {
 
+            
             missionState = "DROP_PACKAGE";
+
+            System.out.println("📦 Mission State: DROP_PACKAGE");
 
             dropPackageActivity.dropPackage();
 
+            Workflow.sleep(Duration.ofSeconds(60));
+
+            // -------------------------------------------------
+            // STEP 4: MISSION COMPLETED
+            // -------------------------------------------------
             missionState = "COMPLETED";
+
+            System.out.println("✅ Mission State: COMPLETED");
 
             return "Mission completed successfully for "
                     + droneIds.size()
@@ -71,16 +102,38 @@ private final ReturnToBaseActivity returnToBaseActivity =Workflow.newActivityStu
 
         } catch (Exception e) {
 
+            // -------------------------------------------------
+            // COMPENSATION
+            // DROP PACKAGE FAILED
+            // -------------------------------------------------
             missionState = "RETURNING_TO_BASE";
 
+            System.out.println(
+                    "⚠️ Package drop failed. Starting compensation..."
+            );
+
+            System.out.println(
+                    "🚁 Mission State: RETURNING_TO_BASE"
+            );
+
+        
             returnToBaseActivity.returnToBase();
 
+            
+            Workflow.sleep(Duration.ofSeconds(60));
+
+         
             missionState = "COMPLETED";
+
+            System.out.println(
+                    "✅ Mission State: COMPLETED"
+            );
 
             return "Drop package failed. Drone returned to base.";
         }
     }
 
+  
     @Override
     public String getMissionState() {
         return missionState;
