@@ -394,7 +394,7 @@ function Dashboard() {
 
       <div className="stats-grid">
 
-        {/* TOTAL */}
+        
 
         <div className="stat-card">
 
@@ -420,7 +420,7 @@ function Dashboard() {
 
         </div>
 
-        {/* ACTIVE */}
+        
 
         <div className="stat-card">
 
@@ -647,7 +647,7 @@ function Dashboard() {
                       key={drone.id}
                     >
 
-                      {/* ID */}
+                    
 
                       <td>
                         <strong>
@@ -655,7 +655,7 @@ function Dashboard() {
                         </strong>
                       </td>
 
-                      {/* STATUS */}
+                      
 
                       <td>
 
@@ -678,7 +678,7 @@ function Dashboard() {
 
                       </td>
 
-                      {/* BATTERY */}
+                     
 
                       <td>
 

@@ -73,11 +73,7 @@ function LiveMap() {
     };
   }, []);
 
-  /*
-   * Create M-01 to M-50 list.
-   * This guarantees that all 50 drones are displayed
-   * even before telemetry arrives.
-   */
+ 
   const droneList = Array.from(
     { length: TOTAL_DRONES },
     (_, index) => {
@@ -184,7 +180,7 @@ function LiveMap() {
 
       <div className="live-map-page">
 
-        {/* ================= HEADER ================= */}
+  
 
         <div className="live-map-header">
 
@@ -209,14 +205,14 @@ function LiveMap() {
         </div>
 
 
-        {/* ================= MAP ================= */}
+        
 
         <div className="live-map-container">
           <CesiumMap />
         </div>
 
 
-        {/* ================= FLEET SUMMARY ================= */}
+       
 
         <div className="fleet-summary">
 
@@ -278,7 +274,7 @@ function LiveMap() {
         </div>
 
 
-        {/* ================= ALL DRONES ================= */}
+       
 
         <div className="active-drones">
 
@@ -317,7 +313,6 @@ function LiveMap() {
                   key={drone.droneId}
                 >
 
-                  {/* CARD HEADER */}
 
                   <div className="drone-card-header">
 
@@ -334,7 +329,7 @@ function LiveMap() {
                   </div>
 
 
-                  {/* DETAILS */}
+                 
 
                   <div className="drone-details">
 
@@ -358,7 +353,7 @@ function LiveMap() {
                   </div>
 
 
-                  {/* BATTERY BAR */}
+                
 
                   <div className="battery">
 
@@ -375,7 +370,7 @@ function LiveMap() {
                   </div>
 
 
-                  {/* LOCATION */}
+                  
 
                   <div className="drone-location">
 
@@ -397,7 +392,7 @@ function LiveMap() {
                   </div>
 
 
-                  {/* LAST UPDATE */}
+               
 
                   <div className="drone-last-update">
 
@@ -422,7 +417,6 @@ function LiveMap() {
         </div>
 
 
-        {/* ================= LOW BATTERY ================= */}
 
         {lowBatteryDrones.length > 0 && (
 

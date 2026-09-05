@@ -9,7 +9,7 @@ public class MissionSagaWorkflowStarter {
      public static void main(String[] args) {
         WorkflowServiceStubs service  = WorkflowServiceStubs.newLocalServiceStubs();
         WorkflowClient client = WorkflowClient.newInstance(service);
-        MissionSagaWorkflow workflow = client.newWorkflowStub(MissionSagaWorkflow.class,WorkflowOptions.newBuilder().setTaskQueue("DRONE_TASK_QUEUE").setWorkflowId("SAGA-TEST-004")
+        MissionSagaWorkflow workflow = client.newWorkflowStub(MissionSagaWorkflow.class,WorkflowOptions.newBuilder().setTaskQueue("DRONE_TASK_QUEUE").setWorkflowId("SAGA-TEST-006")
     .build());
 
     System.out.println("Starting  Mission Saga...");

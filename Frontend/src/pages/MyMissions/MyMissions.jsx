@@ -11,7 +11,14 @@ function MyMissions() {
   const [telemetryDrones, setTelemetryDrones] = useState({});
   const [selectedDrone, setSelectedDrone] = useState(null);
 
-  
+  const [missionState, setMissionState] = useState("CREATED");
+
+  // Week 4: Emergency Abort
+  const [abortLoading, setAbortLoading] = useState(false);
+  const [abortMessage, setAbortMessage] = useState("");
+
+  const workflowId = "SAGA-TEST-006";
+
   const defaultDrones = Array.from({ length: 50 }, (_, index) => {
     const number = String(index + 1).padStart(2, "0");
 
@@ -28,7 +35,6 @@ function MyMissions() {
     };
   });
 
-
   const drones = defaultDrones.map((drone) => {
     const live = telemetryDrones[drone.droneId];
 
@@ -40,14 +46,12 @@ function MyMissions() {
       : drone;
   });
 
-  
   useEffect(() => {
     if (!selectedDrone && drones.length > 0) {
       setSelectedDrone(drones[0]);
     }
   }, []);
 
- 
   useEffect(() => {
     const handleTelemetry = (event) => {
       const telemetry = event.detail;
@@ -84,7 +88,36 @@ function MyMissions() {
     };
   }, []);
 
-  
+  useEffect(() => {
+    const fetchMissionState = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8082/api/missions/${workflowId}/state`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch mission state");
+        }
+
+        const data = await response.json();
+
+        if (data.state) {
+          setMissionState(data.state);
+        }
+      } catch (error) {
+        console.error("Mission state error:", error);
+      }
+    };
+
+    fetchMissionState();
+
+    const interval = setInterval(fetchMissionState, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
   const filteredDrones = drones.filter((drone) => {
     const value = search.trim().toLowerCase();
 
@@ -98,7 +131,6 @@ function MyMissions() {
     );
   });
 
-  
   const visibleResults = filteredDrones.slice(0, 3);
 
   const handleSearchChange = (event) => {
@@ -123,7 +155,6 @@ function MyMissions() {
     setShowResults(false);
   };
 
-  
   const handleSearchKeyDown = (event) => {
     if (event.key !== "Enter") {
       return;
@@ -146,7 +177,6 @@ function MyMissions() {
       return;
     }
 
-    
     const numberMatch = value.match(/\d+/);
 
     if (numberMatch) {
@@ -169,7 +199,54 @@ function MyMissions() {
     setShowResults(false);
   };
 
- 
+  const handleEmergencyAbort = async () => {
+    if (
+      missionState === "ABORTED" ||
+      missionState === "COMPLETED" ||
+      missionState === "RETURNING_TO_BASE"
+    ) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Are you sure you want to emergency abort this mission?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setAbortLoading(true);
+      setAbortMessage("");
+
+      const response = await fetch(
+        `http://localhost:8082/api/missions/${workflowId}/abort`,
+        {
+          method: "POST",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to send emergency abort signal");
+      }
+
+      const data = await response.json();
+
+      setAbortMessage(
+        data.message || "Emergency abort signal sent successfully."
+      );
+    } catch (error) {
+      console.error("Emergency abort error:", error);
+
+      setAbortMessage(
+        "Unable to send emergency abort signal. Please try again."
+      );
+    } finally {
+      setAbortLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!selectedDrone?.droneId) {
       return;
@@ -187,7 +264,6 @@ function MyMissions() {
 
   const drone = selectedDrone || drones[0];
 
-  
   const battery =
     drone?.battery !== undefined ? Number(drone.battery) : 0;
 
@@ -225,6 +301,93 @@ function MyMissions() {
     (drone?.droneId
       ? `Delivery Unit ${String(drone.droneId).replace(/^M-/i, "")}`
       : "Drone");
+
+  
+
+  const getStepStatus = (step) => {
+    switch (missionState) {
+      case "TAKEOFF":
+        if (step === "takeoff") return "active";
+        return "pending";
+
+      case "ACTIVE":
+        if (step === "takeoff") return "completed";
+        if (step === "active") return "active";
+        return "pending";
+
+      case "DROP_PACKAGE":
+        if (step === "takeoff") return "completed";
+        if (step === "active") return "completed";
+        if (step === "drop") return "active";
+        return "pending";
+
+      case "ABORT_REQUESTED":
+        if (step === "takeoff") return "completed";
+        if (step === "active") return "completed";
+        if (step === "drop") return "completed";
+        if (step === "return") return "active";
+        return "pending";
+
+      case "RETURNING_TO_BASE":
+        if (step === "takeoff") return "completed";
+        if (step === "active") return "completed";
+        if (step === "drop") return "failed";
+        if (step === "return") return "active";
+        return "pending";
+
+      case "ABORTED":
+        if (step === "takeoff") return "completed";
+        if (step === "active") return "completed";
+        if (step === "drop") return "completed";
+        if (step === "return") return "completed";
+        if (step === "completed") return "failed";
+        return "completed";
+
+      case "COMPLETED":
+        return "completed";
+
+      default:
+        return "pending";
+    }
+  };
+
+  const getStepText = (step) => {
+    const status = getStepStatus(step);
+
+    if (status === "completed") {
+      return "Completed";
+    }
+
+    if (status === "active") {
+      return "Active";
+    }
+
+    if (status === "failed") {
+      return "Failed";
+    }
+
+    return "Pending";
+  };
+
+  const getStepCircle = (step, number) => {
+    const status = getStepStatus(step);
+
+    if (status === "completed") {
+      return "✓";
+    }
+
+    if (status === "failed") {
+      return "!";
+    }
+
+    return number;
+  };
+
+  const abortDisabled =
+    abortLoading ||
+    missionState === "ABORTED" ||
+    missionState === "COMPLETED" ||
+    missionState === "RETURNING_TO_BASE";
 
   return (
     <div className="my-missions-page">
@@ -270,8 +433,6 @@ function MyMissions() {
           )}
         </div>
 
-       
-
         {showResults && search.trim() && (
           <div className="search-results">
 
@@ -304,12 +465,10 @@ function MyMissions() {
           </div>
         )}
       </div>
-
-  
+\
 
       <div className="missions-content">
 
-        
 
         <div className="live-map-card">
 
@@ -338,9 +497,10 @@ function MyMissions() {
 
         </div>
 
-        
 
         <div className="right-side-column">
+
+        
 
           <div className="selected-drone-card">
 
@@ -381,10 +541,9 @@ function MyMissions() {
 
             <div className="drone-divider"></div>
 
-           
-
             <div className="drone-details">
 
+           
               <div className="detail-item">
 
                 <span>
@@ -398,6 +557,7 @@ function MyMissions() {
                 </strong>
 
                 <div className="battery-bar">
+
                   <div
                     style={{
                       width: `${Math.max(
@@ -406,9 +566,12 @@ function MyMissions() {
                       )}%`,
                     }}
                   ></div>
+
                 </div>
 
               </div>
+
+             
 
               <div className="detail-item">
 
@@ -424,6 +587,8 @@ function MyMissions() {
 
               </div>
 
+             
+
               <div className="detail-item">
 
                 <span>
@@ -437,6 +602,7 @@ function MyMissions() {
                 </strong>
 
               </div>
+
 
               <div className="detail-item">
 
@@ -456,7 +622,7 @@ function MyMissions() {
 
             </div>
 
-           
+            
 
             <div className="location-box">
 
@@ -472,153 +638,236 @@ function MyMissions() {
 
           </div>
 
-        </div>
 
-        
+          <div className="mission-workflow-card">
 
-        <div className="mission-workflow-card">
+            <div className="workflow-header">
 
-          <div className="workflow-header">
+              <div>
 
-            <div>
-              <h2>
-                Mission Workflow
-              </h2>
+                <h2>
+                  Mission Workflow
+                </h2>
 
-              <p>
-                Live mission execution status
-              </p>
-            </div>
+                <p>
+                  Live mission execution status
+                </p>
 
-            <div className="workflow-live">
-              <span></span>
-              LIVE
-            </div>
-
-          </div>
-
-          <div className="workflow-steps">
-
-          
-
-            <div className="workflow-step completed">
-
-              <div className="step-circle">
-                ✓
               </div>
 
-              <div className="step-content">
+              <div className="workflow-live">
 
-                <strong>
-                  Takeoff
-                </strong>
+                <span></span>
 
-                <span>
-                  Completed
-                </span>
+                LIVE
 
               </div>
 
             </div>
 
-            <div className="workflow-arrow">
-              →
+            <div className="workflow-steps">
+
+              <div
+                className={`workflow-step ${getStepStatus(
+                  "takeoff"
+                )}`}
+              >
+
+                <div className="step-circle">
+                  {getStepCircle("takeoff", 1)}
+                </div>
+
+                <div className="step-content">
+
+                  <strong>
+                    Takeoff
+                  </strong>
+
+                  <span>
+                    {getStepText("takeoff")}
+                  </span>
+
+                </div>
+
+              </div>
+
+              <div className="workflow-arrow">
+                →
+              </div>
+
+
+              <div
+                className={`workflow-step ${getStepStatus(
+                  "active"
+                )}`}
+              >
+
+                <div className="step-circle">
+                  {getStepCircle("active", 2)}
+                </div>
+
+                <div className="step-content">
+
+                  <strong>
+                    Mission Active
+                  </strong>
+
+                  <span>
+                    {getStepText("active")}
+                  </span>
+
+                </div>
+
+              </div>
+
+              <div className="workflow-arrow">
+                →
+              </div>
+
+             
+
+              <div
+                className={`workflow-step ${getStepStatus(
+                  "drop"
+                )}`}
+              >
+
+                <div className="step-circle">
+                  {getStepCircle("drop", 3)}
+                </div>
+
+                <div className="step-content">
+
+                  <strong>
+                    Drop Package
+                  </strong>
+
+                  <span>
+                    {getStepText("drop")}
+                  </span>
+
+                </div>
+
+              </div>
+
+              <div className="workflow-arrow">
+                →
+              </div>
+
+              
+              <div
+                className={`workflow-step ${getStepStatus(
+                  "return"
+                )}`}
+              >
+
+                <div className="step-circle">
+                  {getStepCircle("return", 4)}
+                </div>
+
+                <div className="step-content">
+
+                  <strong>
+                    Return to Base
+                  </strong>
+
+                  <span>
+                    {getStepText("return")}
+                  </span>
+
+                </div>
+
+              </div>
+
+              <div className="workflow-arrow">
+                →
+              </div>
+
+              {/* COMPLETED */}
+
+              <div
+                className={`workflow-step ${getStepStatus(
+                  "completed"
+                )}`}
+              >
+
+                <div className="step-circle">
+                  {getStepCircle("completed", 5)}
+                </div>
+
+                <div className="step-content">
+
+                  <strong>
+                    Completed
+                  </strong>
+
+                  <span>
+                    {getStepText("completed")}
+                  </span>
+
+                </div>
+
+              </div>
+
             </div>
 
-            
-            <div className="workflow-step active">
 
-              <div className="step-circle">
-                2
-              </div>
+            <div
+              style={{
+                marginTop: "20px",
+                paddingTop: "16px",
+                borderTop:
+                  "1px solid rgba(255, 255, 255, 0.08)",
+              }}
+            >
 
-              <div className="step-content">
+              <button
+                onClick={handleEmergencyAbort}
+                disabled={abortDisabled}
+                style={{
+                  width: "100%",
+                  padding: "12px 18px",
+                  border: "none",
+                  borderRadius: "8px",
+                  background: abortDisabled
+                    ? "#555"
+                    : "#d32f2f",
+                  color: "#fff",
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  cursor: abortDisabled
+                    ? "not-allowed"
+                    : "pointer",
+                  opacity: abortLoading ? 0.7 : 1,
+                  transition: "all 0.2s ease",
+                }}
+              >
 
-                <strong>
-                  Mission Active
-                </strong>
+                {abortLoading
+                  ? "Sending Emergency Abort..."
+                  : missionState === "ABORTED"
+                  ? "Mission Aborted"
+                  : missionState === "COMPLETED"
+                  ? "Mission Completed"
+                  : missionState === "RETURNING_TO_BASE"
+                  ? "Returning to Base..."
+                  : "🚨 Emergency Abort"}
 
-                <span>
-                  Active
-                </span>
+              </button>
 
-              </div>
-
-            </div>
-
-            <div className="workflow-arrow">
-              →
-            </div>
-
-            
-
-            <div className="workflow-step pending">
-
-              <div className="step-circle">
-                3
-              </div>
-
-              <div className="step-content">
-
-                <strong>
-                  Drop Package
-                </strong>
-
-                <span>
-                  Pending
-                </span>
-
-              </div>
-
-            </div>
-
-            <div className="workflow-arrow">
-              →
-            </div>
-
-
-            <div className="workflow-step pending">
-
-              <div className="step-circle">
-                4
-              </div>
-
-              <div className="step-content">
-
-                <strong>
-                  Return to Base
-                </strong>
-
-                <span>
-                  Pending
-                </span>
-
-              </div>
-
-            </div>
-
-            <div className="workflow-arrow">
-              →
-            </div>
-
-            
-            <div className="workflow-step pending">
-
-              <div className="step-circle">
-                5
-              </div>
-
-              <div className="step-content">
-
-                <strong>
-                  Completed
-                </strong>
-
-                <span>
-                  Pending
-                </span>
-
-              </div>
+              {abortMessage && (
+                <p
+                  style={{
+                    marginTop: "10px",
+                    marginBottom: 0,
+                    fontSize: "12px",
+                    textAlign: "center",
+                    color: "#aaa",
+                  }}
+                >
+                  {abortMessage}
+                </p>
+              )}
 
             </div>
 

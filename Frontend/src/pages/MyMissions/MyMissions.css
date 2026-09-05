@@ -676,3 +676,79 @@
     flex-basis: 25px;
   }
 }
+
+.mission-workflow-card button {
+  transition: all 0.2s ease;
+}
+
+/* Active Emergency Abort button */
+.mission-workflow-card button:not(:disabled) {
+  background: #d32f2f !important;
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.25);
+}
+
+.mission-workflow-card button:not(:disabled):hover {
+  background: #b71c1c !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(211, 47, 47, 0.35);
+}
+
+.mission-workflow-card button:not(:disabled):active {
+  transform: translateY(0);
+}
+
+
+.mission-workflow-card button:disabled {
+  cursor: not-allowed;
+}
+
+.mission-workflow-card p {
+  transition: all 0.2s ease;
+}
+
+
+
+.workflow-step.failed {
+  border-color: #d32f2f !important;
+}
+
+.workflow-step.failed .step-circle {
+  border-color: #d32f2f !important;
+  background: rgba(211, 47, 47, 0.12) !important;
+  color: #ff5252 !important;
+}
+
+.workflow-step.active {
+  border-color: #00c853;
+}
+
+/* Completed workflow step */
+.workflow-step.completed {
+  border-color: rgba(0, 200, 83, 0.5);
+}
+
+
+.workflow-step.failed .step-content strong {
+  color: #ff5252;
+}
+
+.workflow-step.failed .step-content span {
+  color: #ff8a80;
+}
+
+
+
+@media (max-width: 768px) {
+  .mission-workflow-card {
+    overflow-x: hidden;
+  }
+
+  .workflow-steps {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .mission-workflow-card button {
+    min-height: 44px;
+  }
+}

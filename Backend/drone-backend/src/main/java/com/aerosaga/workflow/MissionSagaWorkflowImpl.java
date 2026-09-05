@@ -15,8 +15,10 @@ import java.util.List;
 
 public class MissionSagaWorkflowImpl implements MissionSagaWorkflow {
 
-
     private String missionState = "CREATED";
+
+    
+    private boolean abortRequested = false;
 
     private final TakeoffActivity takeoffActivity =
             Workflow.newActivityStub(
@@ -25,7 +27,6 @@ public class MissionSagaWorkflowImpl implements MissionSagaWorkflow {
                             .setStartToCloseTimeout(Duration.ofMinutes(1))
                             .build()
             );
-
 
     private final DropPackageActivity dropPackageActivity =
             Workflow.newActivityStub(
@@ -40,7 +41,6 @@ public class MissionSagaWorkflowImpl implements MissionSagaWorkflow {
                             .build()
             );
 
-  
     private final ReturnToBaseActivity returnToBaseActivity =
             Workflow.newActivityStub(
                     ReturnToBaseActivity.class,
@@ -49,7 +49,6 @@ public class MissionSagaWorkflowImpl implements MissionSagaWorkflow {
                             .build()
             );
 
-  
     @Override
     public String executeMission(List<String> droneIds) {
 
@@ -68,30 +67,53 @@ public class MissionSagaWorkflowImpl implements MissionSagaWorkflow {
 
         Promise.allOf(takeoffPromises).get();
 
-        
+     
+        if (abortRequested) {
+            return handleEmergencyAbort();
+        }
+
         Workflow.sleep(Duration.ofSeconds(60));
 
+        
+        if (abortRequested) {
+            return handleEmergencyAbort();
+        }
+
+        
         missionState = "ACTIVE";
 
         System.out.println("🛰️ Mission State: ACTIVE");
 
-        // Keep ACTIVE visible for 5 seconds
+       
         Workflow.sleep(Duration.ofSeconds(5));
+
+        
+        if (abortRequested) {
+            return handleEmergencyAbort();
+        }
 
         try {
 
             
+
             missionState = "DROP_PACKAGE";
 
             System.out.println("📦 Mission State: DROP_PACKAGE");
 
             dropPackageActivity.dropPackage();
 
+            
+            if (abortRequested) {
+                return handleEmergencyAbort();
+            }
+
             Workflow.sleep(Duration.ofSeconds(60));
 
-            // -------------------------------------------------
-            // STEP 4: MISSION COMPLETED
-            // -------------------------------------------------
+            if (abortRequested) {
+                return handleEmergencyAbort();
+            }
+
+            
             missionState = "COMPLETED";
 
             System.out.println("✅ Mission State: COMPLETED");
@@ -102,10 +124,7 @@ public class MissionSagaWorkflowImpl implements MissionSagaWorkflow {
 
         } catch (Exception e) {
 
-            // -------------------------------------------------
-            // COMPENSATION
-            // DROP PACKAGE FAILED
-            // -------------------------------------------------
+      
             missionState = "RETURNING_TO_BASE";
 
             System.out.println(
@@ -116,13 +135,10 @@ public class MissionSagaWorkflowImpl implements MissionSagaWorkflow {
                     "🚁 Mission State: RETURNING_TO_BASE"
             );
 
-        
             returnToBaseActivity.returnToBase();
 
-            
             Workflow.sleep(Duration.ofSeconds(60));
 
-         
             missionState = "COMPLETED";
 
             System.out.println(
@@ -133,7 +149,49 @@ public class MissionSagaWorkflowImpl implements MissionSagaWorkflow {
         }
     }
 
-  
+
+    @Override
+    public void emergencyAbort() {
+
+        System.out.println(
+                "🚨 EMERGENCY ABORT SIGNAL RECEIVED!"
+        );
+
+        abortRequested = true;
+
+        missionState = "ABORT_REQUESTED";
+
+        System.out.println(
+                "⚠️ Mission State: ABORT_REQUESTED"
+        );
+    }
+
+
+    private String handleEmergencyAbort() {
+
+        missionState = "RETURNING_TO_BASE";
+
+        System.out.println(
+                "🚨 Emergency Abort confirmed."
+        );
+
+        System.out.println(
+                "🚁 Mission State: RETURNING_TO_BASE"
+        );
+
+        returnToBaseActivity.returnToBase();
+
+        missionState = "ABORTED";
+
+        System.out.println(
+                "🛑 Mission State: ABORTED"
+        );
+
+        return "Mission emergency aborted. Drone returned to base.";
+    }
+
+    
+
     @Override
     public String getMissionState() {
         return missionState;

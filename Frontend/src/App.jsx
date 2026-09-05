@@ -12,19 +12,19 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* Login */}
+        
         <Route
           path="/login"
           element={<Login />}
         />
 
-        {/* Register */}
+        
         <Route
           path="/register"
           element={<Register />}
         />
 
-        {/* Dashboard */}
+        
         <Route
           path="/dashboard"
           element={
@@ -34,25 +34,25 @@ function App() {
           }
         />
 
-        {/* Live Map */}
+        
         <Route
           path="/live-map"
           element={<LiveMap />}
         />
 
-        {/* My Missions */}
+        
         <Route
           path="/my-missions"
           element={<MyMissions />}
         />
 
-        {/* Default */}
+     
         <Route
           path="/"
           element={<Navigate to="/login" replace />}
         />
 
-        {/* Unknown pages */}
+        
         <Route
           path="*"
           element={<Navigate to="/login" replace />}

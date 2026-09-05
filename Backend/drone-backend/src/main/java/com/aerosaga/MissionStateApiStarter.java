@@ -1,29 +1,32 @@
 package com.aerosaga;
+
 import com.aerosaga.workflow.MissionSagaWorkflow;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpsServer;
+
 import io.temporal.client.WorkflowClient;
 import io.temporal.serviceclient.WorkflowServiceStubs;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.security.Provider.Service;
+
 public class MissionStateApiStarter {
 
     private static final int PORT = 8082;
 
     public static void main(String[] args) throws Exception {
 
-        // Connect to local Temporal server
+     
         WorkflowServiceStubs service =
                 WorkflowServiceStubs.newLocalServiceStubs();
 
         WorkflowClient client =
                 WorkflowClient.newInstance(service);
 
-        // Create HTTP server
+       
         HttpServer server =
                 HttpServer.create(new InetSocketAddress(PORT), 0);
 
@@ -38,11 +41,9 @@ public class MissionStateApiStarter {
 
             String path = exchange.getRequestURI().getPath();
 
-            // Expected:
-            // /api/missions/SAGA-TEST-002/state
             String prefix = "/api/missions/";
 
-            if (!path.startsWith(prefix) || !path.endsWith("/state")) {
+            if (!path.startsWith(prefix)) {
                 sendResponse(
                         exchange,
                         404,
@@ -51,42 +52,111 @@ public class MissionStateApiStarter {
                 return;
             }
 
-            String workflowId =
-                    path.substring(
-                            prefix.length(),
-                            path.length() - "/state".length()
-                    );
+            String remainingPath =
+                    path.substring(prefix.length());
 
-            try {
+            
 
-                MissionSagaWorkflow workflow =
-                        client.newWorkflowStub(
-                                MissionSagaWorkflow.class,
-                                workflowId
+            if (remainingPath.endsWith("/state")) {
+
+                String workflowId =
+                        remainingPath.substring(
+                                0,
+                                remainingPath.length() - "/state".length()
                         );
 
-                String state =
-                        workflow.getMissionState();
+                try {
 
-                String json =
-                        "{\"workflowId\":\""
-                                + workflowId
-                                + "\",\"state\":\""
-                                + state
-                                + "\"}";
+                    MissionSagaWorkflow workflow =
+                            client.newWorkflowStub(
+                                    MissionSagaWorkflow.class,
+                                    workflowId
+                            );
 
-                sendResponse(exchange, 200, json);
+                    String state =
+                            workflow.getMissionState();
 
-            } catch (Exception e) {
+                    String json =
+                            "{\"workflowId\":\""
+                                    + workflowId
+                                    + "\",\"state\":\""
+                                    + state
+                                    + "\"}";
 
-                e.printStackTrace();
+                    sendResponse(exchange, 200, json);
 
-                sendResponse(
-                        exchange,
-                        500,
-                        "{\"error\":\"Unable to query workflow state\"}"
-                );
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+
+                    sendResponse(
+                            exchange,
+                            500,
+                            "{\"error\":\"Unable to query workflow state\"}"
+                    );
+                }
+
+                return;
             }
+
+            
+            if (remainingPath.endsWith("/abort")) {
+
+                if (!"POST".equalsIgnoreCase(
+                        exchange.getRequestMethod())) {
+
+                    sendResponse(
+                            exchange,
+                            405,
+                            "{\"error\":\"POST method required\"}"
+                    );
+
+                    return;
+                }
+
+                String workflowId =
+                        remainingPath.substring(
+                                0,
+                                remainingPath.length() - "/abort".length()
+                        );
+
+                try {
+
+                    MissionSagaWorkflow workflow =
+                            client.newWorkflowStub(
+                                    MissionSagaWorkflow.class,
+                                    workflowId
+                            );
+
+                    
+                    workflow.emergencyAbort();
+
+                    String json =
+                            "{\"workflowId\":\""
+                                    + workflowId
+                                    + "\",\"message\":\"Emergency abort signal sent\"}";
+
+                    sendResponse(exchange, 200, json);
+
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+
+                    sendResponse(
+                            exchange,
+                            500,
+                            "{\"error\":\"Unable to send emergency abort signal\"}"
+                    );
+                }
+
+                return;
+            }
+
+            sendResponse(
+                    exchange,
+                    404,
+                    "{\"error\":\"Unknown endpoint\"}"
+            );
         });
 
         server.setExecutor(null);
@@ -95,9 +165,15 @@ public class MissionStateApiStarter {
         System.out.println("======================================");
         System.out.println("🚁 AeroSaga Mission State API started");
         System.out.println("📡 Port: " + PORT);
+        System.out.println("📊 State API:");
         System.out.println(
-                "🔗 http://localhost:" + PORT +
-                "/api/missions/SAGA-TEST-002/state"
+                "http://localhost:" + PORT +
+                "/api/missions/{workflowId}/state"
+        );
+        System.out.println("🚨 Abort API:");
+        System.out.println(
+                "POST http://localhost:" + PORT +
+                "/api/missions/{workflowId}/abort"
         );
         System.out.println("======================================");
     }
@@ -111,7 +187,7 @@ public class MissionStateApiStarter {
 
         exchange.getResponseHeaders().add(
                 "Access-Control-Allow-Methods",
-                "GET, OPTIONS"
+                "GET, POST, OPTIONS"
         );
 
         exchange.getResponseHeaders().add(
